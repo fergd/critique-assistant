@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI UX Audit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --default-font: 'Plus Jakarta Sans', sans-serif;
+  --main-bg-color: white;       
+  --card-surface: white;        
+  --text: black;                
+  --borders: black;             
+  --highlights: yellow;          
+  --button-bg: black;           
+  --accent-color: yellow;        
+  --button-primary-bg: white;       
+  --button-primary-bg-hover: black; 
+  --button-primary-text: black;     
+  --button-primary-border: black;   
+  --button-primary-shadow: black; 
+  --border-radius: 11px;
+  --default-padding: 11px;
+  --default-margin: 15px;
+}
+body {
+  font-family: var(--default-font);
+  font-weight: 800;
+  padding: var(--default-padding);
+  background: var(--main-bg-color);
+  color: var(--text);
+}
+textarea, .surface {
+  background: var(--card-surface);
+  border-radius: var(--border-radius);
+  padding: var(--default-padding);
+}
+label {
+  display: block;
+  margin-bottom: 5px;
+}
+button{
+  border-radius: var(--border-radius);
+  padding: var(--default-padding);
+  cursor: pointer;
+  background-color: var(button-primary-bg);
+  color: black;
+  font-family: inherit;
+  font-weight: 800;
+}
+.badge{
+  display: inline-block;
+  margin: 5px 0;
+  padding: var(--default-padding);
+}
+.primary-button {
+  font-size: 21px;
+  font-family: inherit;
+  width: 100%;
+  margin: 21px 0;
+  background: var(--button-primary-bg);
+  color: var(--button-primary-text);
+  border: 2px solid var(--button-primary-border);
+  box-shadow: -6px 6px 0px 0px var(--button-primary-border);
+}
+.primary-button:hover {
+  background: var(--accent-color);
+}
+h1,h2,h3,p {
+  color: var(--text);
+}
+.card {
+  background: var(--card-surface);
+  border-radius: var(--border-radius);
+  margin-bottom: 19px;
+  padding: 19px;
+  border: 1px solid black;
+  box-shadow: -6px 6px 0px 0px var(--button-primary-border);
+}
+.spinner:after {
+  content: " ";
+  display: block;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 3px solid #ccc;
+  border-color: #ccc transparent #ccc transparent;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.summary {
+  padding: var(--default-padding);
+  margin-bottom: var(--default-margin);
+  border-left: 6px solid black;
+  background: var(--card-surface);
+}
+.badge {
+  padding: 2px 6px;
+  border-radius: var(--border-radius);
+  font-size: 0.85em;
+}
+.high { background-color: red; color: white; }
+.medium { background-color: orange; color: black; }
+.low { background-color: lightgreen; color: black; }
+textarea {
+  width: 100%;
+  min-height: 100px;
+  margin-bottom: 10px;
+}
+section {
+  display: none;
+}
+  </style>
+</head>
+<body>
+
+<h1>Critique Assistant</h1>
+
+<section id="before-container">
+  <h2>Step 1: select frames</h2>
+  <h2>Step 2: paste your PRD <small>(optional)</small></h2>
+  <div>
+    <label for="prd">Product Requirements Document</label>
+    <textarea id="prd" placeholder="Paste content..."></textarea>
+  </div>
+  <div>
+    <button id="analyzeBtn" class="primary-button">Start critique</button>
+  </div>
+</section>
+
+<section id="analyzing-container">
+  <div class="spinner"></div>
+  <div id="loading" class="status status-starting">Preparing…</div>
+  <div id="frameCount" style="margin-top: 6px; font-size: 0.9em;"></div>
+</section>
+
+<section id="results-container">
+  <div id="output"></div>
+  <button id="restartBtn" class="primary-button">Critique again</button>
+</section>
+
+<script>
+  const assistant_id = "asst_PHFIBF9MDPXV6IfZOAxtUGnL";
+  const apiKey = "sk-proj-";
+
+  function setVisibleSection(id) {
+    const sections = ["before-container", "analyzing-container", "results-container"];
+    sections.forEach(sid => {
+      document.getElementById(sid).style.display = (sid === id) ? "block" : "none";
+    });
+  }
+
+  function highlightNode(id) {
+    parent.postMessage({ pluginMessage: { type: "highlight", nodeId: id } }, "*");
+  }
+
+  function renderBadge(sev) {
+    if (!sev) return "";
+    const cls = sev.toLowerCase();
+    return `<span class="badge ${cls}">${sev}</span>`;
+  }
+
+  function renderIssues(issues) {
+    const grouped = { High: [], Medium: [], Low: [], Unknown: [] };
+    for (const i of issues) {
+      const level = i.severity || "Unknown";
+      grouped[level]?.push(i);
+    }
+
+    let html = "";
+    for (const level of ["High", "Medium", "Low", "Unknown"]) {
+      const list = grouped[level];
+      if (list.length === 0) continue;
+      html += `<h3>${level} Severity (${list.length})</h3>`;
+      for (const i of list) {
+        const title = i.type === "trap"
+          ? `<strong>Trap: ${i.trap_name}</strong><br><em>Tenet: ${i.tenet_name}</em>`
+          : `<strong>Heuristic: ${i.heuristic_name}</strong>`;
+        const btn = i.nodeId
+          ? `<button class="reveal-button" onclick="highlightNode('${i.nodeId}')">Reveal</button>` : "";
+        html += `<div class="card">${title}<br>${renderBadge(i.severity)}<br><p>${i.description}</p>${btn}</div>`;
+      }
+    }
+    return html;
+  }
+
+  function summarize(issues) {
+    const bullets = issues.slice(0, 5).map(i => `• ${i.description}`).join("<br>");
+    return `<div class="summary card"><strong>Summary:</strong><br>${bullets}</div>`;
+  }
+
+  function startAnalysis() {
+    setVisibleSection("analyzing-container");
+    document.getElementById("output").innerHTML = "";
+    document.getElementById("loading").innerText = "Starting analysis pipeline...";
+    document.getElementById("frameCount").innerText = "";
+    parent.postMessage({ pluginMessage: { type: "trigger-analysis" } }, "*");
+  }
+
+  document.getElementById("analyzeBtn").onclick = startAnalysis;
+  document.getElementById("restartBtn").onclick = () => setVisibleSection("before-container");
+
+  window.onload = () => setVisibleSection("before-container");
+
+  window.onmessage = async (event) => {
+    const data = event.data.pluginMessage;
+    if (!data || data.type !== "design-data") return;
+
+    try {
+      const prd = document.getElementById("prd").value;
+      const input = JSON.stringify({ design: data.payload, prd: prd || null });
+
+      setVisibleSection("analyzing-container");
+
+      const frameCount = data.payload?.children?.length || 1;
+      document.getElementById("frameCount").innerText = `${frameCount} frame${frameCount === 1 ? "" : "s"} selected`;
+
+      const headers = {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "OpenAI-Beta": "assistants=v2"
+      };
+
+      const threadRes = await fetch("https://api.openai.com/v1/threads", {
+        method: "POST", headers, body: JSON.stringify({})
+      });
+      if (!threadRes.ok) throw new Error("Failed to create thread");
+      const thread = await threadRes.json();
+      document.getElementById("loading").innerText = "Thread created...";
+
+      await fetch(`https://api.openai.com/v1/threads/${thread.id}/messages`, {
+        method: "POST", headers,
+        body: JSON.stringify({ role: "user", content: input })
+      });
+      document.getElementById("loading").innerText = "Message sent...";
+
+      const runRes = await fetch(`https://api.openai.com/v1/threads/${thread.id}/runs`, {
+        method: "POST", headers,
+        body: JSON.stringify({ assistant_id })
+      });
+      if (!runRes.ok) throw new Error("Failed to start run");
+      const run = await runRes.json();
+      document.getElementById("loading").innerText = "Run started...";
+
+      let dotCount = 0;
+      while (true) {
+        const statusRes = await fetch(`https://api.openai.com/v1/threads/${thread.id}/runs/${run.id}`, { headers });
+        const status = await statusRes.json();
+        const loadingEl = document.getElementById("loading");
+
+        if (status.status === "queued") {
+          loadingEl.innerText = "Queued — waiting on OpenAI...";
+        } else if (status.status === "in_progress") {
+          loadingEl.innerText = `Analyzing${'.'.repeat(dotCount % 4)}`;
+          dotCount++;
+        } else if (status.status === "completed") {
+          loadingEl.innerText = "Complete!";
+          break;
+        } else if (status.status === "failed") {
+          loadingEl.innerText = "❌ Run failed";
+          throw new Error("Run failed");
+        }
+
+        await new Promise(r => setTimeout(r, 1000));
+      }
+
+      const messagesRes = await fetch(`https://api.openai.com/v1/threads/${thread.id}/messages`, { headers });
+      const messages = await messagesRes.json();
+      const content = messages.data.find(m => m.role === "assistant")?.content?.[0]?.text?.value;
+      const parsed = JSON.parse(content);
+
+      document.getElementById("output").innerHTML =
+        (Array.isArray(parsed) && parsed.length === 0)
+        ? `<div style="color:MediumSeaGreen;"><strong>No issues found 🎉</strong></div>`
+        : summarize(parsed) + renderIssues(parsed);
+
+      setVisibleSection("results-container");
+
+    } catch (err) {
+      console.error("❌ GPT error:", err);
+      document.getElementById("output").innerHTML =
+        `<div style="color:red;"><strong>Error:</strong> ${err.message}</div>`;
+      setVisibleSection("results-container");
+    }
+  };
+</script>
+
+</body>
+</html>
