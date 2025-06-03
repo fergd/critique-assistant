@@ -4,7 +4,7 @@
 
 ---
 
-## 🚀 Features
+## Features
 
 - ⚡ One-click AI-powered UX critiques
 - 🧠 Evaluates designs using:
@@ -19,7 +19,7 @@
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 
@@ -27,7 +27,7 @@
 ├── code.js             # Plugin logic (Figma → HTML postMessages)
 ├── ui.html             # Plugin UI + full logic for interacting with OpenAI
 ├── manifest.json       # Figma plugin manifest
-├── homebase\_text.txt   # Text reference from the design system (attached in vector store)
+├── tenets_and_traps.json    # JSON traps
 ├── image.txt           # Visual descriptions or layout conventions (attached in vector store)
 └── README.md           # This file
 
@@ -35,7 +35,7 @@
 
 ---
 
-## 🧪 Usage
+## Usage
 
 1. **Install the plugin locally** via Figma’s development mode:
    - Go to **Plugins → Development → New Plugin...**
@@ -49,7 +49,7 @@
 
 ---
 
-## 🔐 Configuration
+## Configuration
 
 - Set your **OpenAI API key** and **assistant ID** in `ui.html`:
 
@@ -67,7 +67,7 @@ const apiKey = "sk-proj-...";
 
 ---
 
-## 🧠 Assistant Prompt Template
+## Assistant Prompt Template
 
 Your Assistant prompt should include:
 
@@ -81,7 +81,7 @@ Your Assistant prompt should include:
 
 ---
 
-## 🧩 Dependencies
+## Dependencies
 
 * OpenAI Assistants API v2 (`"OpenAI-Beta": "assistants=v2"`)
 * Figma Plugin API
@@ -101,7 +101,7 @@ Your Assistant prompt should include:
 
 ---
 
-## 💬 Development Notes
+## Development Notes
 
 * All UI and API logic is contained in `ui.html`
 * Plugin uses `postMessage` from Figma → iframe to transfer design data
@@ -114,7 +114,7 @@ Your Assistant prompt should include:
 
 ---
 
-## 🛠️ Future Enhancements
+## Future Enhancements
 
 * 💡 Export UX reports (PDF or Markdown)
 * 🎨 Custom theming per org/team
@@ -125,9 +125,6 @@ Your Assistant prompt should include:
 
 ## 📄 License
 
-MIT License © \[Your Name or Org]
+MIT License © \[Homebase]
 
-```
 
-Let me know if you'd like to insert images, badges, or any contribution guidelines!
-```
