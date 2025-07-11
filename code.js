@@ -3,23 +3,22 @@ figma.showUI(__html__, { width: 500, height: 700 });
 function serializeNode(node, depth = 0) {
   if (depth > 4 || !node.visible) return null;
   return {
-  nodeId: node.id,
-  name: node.name,
-  type: node.type,
-  characters: node.type === "TEXT" ? node.characters : undefined,
-  textKey: node.type === "TEXT" && typeof node.characters === "string"
-    ? node.characters.trim().toLowerCase()
-    : undefined,
-  visible: node.visible,
-  layoutMode: node.layoutMode,
-  itemSpacing: node.itemSpacing,
-  width: "width" in node ? node.width : undefined,
-  height: "height" in node ? node.height : undefined,
-  children: "children" in node
-    ? node.children.map(child => serializeNode(child, depth + 1)).filter(Boolean)
-    : []
-};
-
+    nodeId: node.id,
+    name: node.name,
+    type: node.type,
+    characters: node.type === "TEXT" ? node.characters : undefined,
+    textKey: node.type === "TEXT" && typeof node.characters === "string"
+      ? node.characters.trim().toLowerCase()
+      : undefined,
+    visible: node.visible,
+    layoutMode: node.layoutMode,
+    itemSpacing: node.itemSpacing,
+    width: "width" in node ? node.width : undefined,
+    height: "height" in node ? node.height : undefined,
+    children: "children" in node
+      ? node.children.map(child => serializeNode(child, depth + 1)).filter(Boolean)
+      : []
+  };
 }
 
 figma.ui.onmessage = async (msg) => {
@@ -41,7 +40,8 @@ figma.ui.onmessage = async (msg) => {
     }
 
     if (msg.type === "highlight") {
-      const node = figma.getNodeById(msg.nodeId);
+      // Use getNodeByIdAsync instead of getNodeById
+      const node = await figma.getNodeByIdAsync(msg.nodeId);
       if (!node) {
         figma.notify("Node not found.");
         return;
