@@ -1,11 +1,12 @@
 {
     "name": "Critique Assistant",
-    "id": "crit-assistant",
+    "id": "1525540792303464974",
     "api": "1.0.0",
     "main": "code.js",
     "ui": "ui.html",
     "editorType": ["figma"],
     "enableProposedApi": false,
+    "documentAccess": "dynamic-page",
     "networkAccess":
     {
         "allowedDomains": [
