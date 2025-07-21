@@ -1,294 +1,1610 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
+
 <head>
-  <meta charset="UTF-8" />
-  <title>AI UX Audit</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
-  <style>
-:root {
-  --default-font: 'Plus Jakarta Sans', sans-serif;
-  --main-bg-color: white;       
-  --card-surface: white;        
-  --text: black;                
-  --borders: black;             
-  --highlights: yellow;          
-  --button-bg: black;           
-  --accent-color: yellow;        
-  --button-primary-bg: white;       
-  --button-primary-bg-hover: black; 
-  --button-primary-text: black;     
-  --button-primary-border: black;   
-  --button-primary-shadow: black; 
-  --border-radius: 11px;
-  --default-padding: 11px;
-  --default-margin: 15px;
-}
-body {
-  font-family: var(--default-font);
-  font-weight: 800;
-  padding: var(--default-padding);
-  background: var(--main-bg-color);
-  color: var(--text);
-}
-textarea, .surface {
-  background: var(--card-surface);
-  border-radius: var(--border-radius);
-  padding: var(--default-padding);
-}
-label {
-  display: block;
-  margin-bottom: 5px;
-}
-button{
-  border-radius: var(--border-radius);
-  padding: var(--default-padding);
-  cursor: pointer;
-  background-color: var(button-primary-bg);
-  color: black;
-  font-family: inherit;
-  font-weight: 800;
-}
-.badge{
-  display: inline-block;
-  margin: 5px 0;
-  padding: var(--default-padding);
-}
-.primary-button {
-  font-size: 21px;
-  font-family: inherit;
-  width: 100%;
-  margin: 21px 0;
-  background: var(--button-primary-bg);
-  color: var(--button-primary-text);
-  border: 2px solid var(--button-primary-border);
-  box-shadow: -6px 6px 0px 0px var(--button-primary-border);
-}
-.primary-button:hover {
-  background: var(--accent-color);
-}
-h1,h2,h3,p {
-  color: var(--text);
-}
-.card {
-  background: var(--card-surface);
-  border-radius: var(--border-radius);
-  margin-bottom: 19px;
-  padding: 19px;
-  border: 1px solid black;
-  box-shadow: -6px 6px 0px 0px var(--button-primary-border);
-}
-.spinner:after {
-  content: " ";
-  display: block;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  border: 3px solid #ccc;
-  border-color: #ccc transparent #ccc transparent;
-  animation: spin 1s linear infinite;
-}
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-.summary {
-  padding: var(--default-padding);
-  margin-bottom: var(--default-margin);
-  border-left: 6px solid black;
-  background: var(--card-surface);
-}
-.badge {
-  padding: 2px 6px;
-  border-radius: var(--border-radius);
-  font-size: 0.85em;
-}
-.high { background-color: red; color: white; }
-.medium { background-color: orange; color: black; }
-.low { background-color: lightgreen; color: black; }
-textarea {
-  width: 100%;
-  min-height: 100px;
-  margin-bottom: 10px;
-}
-section {
-  display: none;
-}
-  </style>
+    <title>Critique Assistant</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,600;0,800;1,400;1,600;1,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+    :root {
+        /* Official 8-color palette */
+        --midnight: #1a0f3d;
+        --midnight-light: #8d879e;
+        --twilight: #3b2471;
+        --twilight-light: #9d92b8;
+        --amethyst: #7E3DD4;
+        --amethyst-light: #bf9eea;
+        --orchid: #b845c7;
+        --orchid-light: #dca2e3;
+        --fuchsia: #e24ba6;
+        --fuchsia-light: #f1a5d3;
+        --sunset: #ff5d7a;
+        --sunset-light: #ffaebd;
+        --tangerine: #ff7c4f;
+        --tangerine-light: #ffbea7;
+        --amber: #ffa600;
+        --amber-light: #ffd380;
+        --snow: #ffffff;
+        --mint: #C1EA9E;
+        --dark-mint: #65CF47;
+
+        /* Typography */
+        --base-font-size: 15px;
+        --font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+
+        --ms3: 3.375rem;
+        --ms2: 2.25rem;
+        --ms1: 1.5rem;
+        --ms0: 1rem;
+        --ms-1: 0.667rem;
+
+        --font-size-heading: var(--ms1);
+        --font-size-body: var(--ms0);
+        --font-size-small: var(--ms-1);
+        --font-heavy: 800;
+        --font-normal: 600;
+
+        /* Spacing */
+        --padding-large: var(--ms2);
+        --padding-medium: var(--ms1);
+        --padding-small: var(--ms0);
+        --padding-tiny: var(--ms-1);
+        --spacing-large: var(--ms3);
+        --spacing-medium: var(--ms0);
+        --spacing-small: var(--ms-1);
+
+        --button-shadow-offset: -4px 4px 0;
+        --button-shadow-bolder: -7px 7px 0;
+
+        --default-weight: 4px;
+        --default-radius: 11px;
+        --default-border: var(--default-weight) solid var(--midnight);
+        --border-subdued: var(--default-weight) solid var(--midnight-light);
+        --shadow-bold: var(--button-shadow-offset) var(--midnight);
+        --shadow-subdued: var(--button-shadow-offset) var(--midnight-light);
+        --shadow-bold: var(--button-shadow-bolder) var(--midnight);
+
+
+        /* Semantic colors */
+        --app-bg: var(--snow);
+        --text-primary: var(--twilight);
+        --text-secondary: var(--midnight-light);
+    }
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+
+    /* http://meyerweb.com/eric/tools/css/reset/ 
+           v2.0 | 20110126
+           License: none (public domain)
+        */
+
+    html,
+    body,
+    div,
+    span,
+    applet,
+    object,
+    iframe,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    blockquote,
+    pre,
+    a,
+    abbr,
+    acronym,
+    address,
+    big,
+    cite,
+    code,
+    del,
+    dfn,
+    em,
+    img,
+    ins,
+    kbd,
+    q,
+    s,
+    samp,
+    small,
+    strike,
+    strong,
+    sub,
+    sup,
+    tt,
+    var,
+    b,
+    u,
+    i,
+    center,
+    dl,
+    dt,
+    dd,
+    ol,
+    ul,
+    li,
+    fieldset,
+    form,
+    label,
+    legend,
+    table,
+    caption,
+    tbody,
+    tfoot,
+    thead,
+    tr,
+    th,
+    td,
+    article,
+    aside,
+    canvas,
+    details,
+    embed,
+    figure,
+    figcaption,
+    footer,
+    header,
+    hgroup,
+    menu,
+    nav,
+    output,
+    ruby,
+    section,
+    summary,
+    time,
+    mark,
+    audio,
+    video {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        font-size: 100%;
+        font: inherit;
+        vertical-align: baseline;
+    }
+
+    /* HTML5 display-role reset for older browsers */
+    article,
+    aside,
+    details,
+    figcaption,
+    figure,
+    footer,
+    header,
+    hgroup,
+    menu,
+    nav,
+    section {
+        display: block;
+    }
+
+    body {
+        line-height: 1;
+    }
+
+    blockquote,
+    q {
+        quotes: none;
+    }
+
+    blockquote:before,
+    blockquote:after,
+    q:before,
+    q:after {
+        content: '';
+        content: none;
+    }
+
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+
+    ul {
+        list-style: none;
+    }
+
+    html {
+        font-size: var(--base-font-size);
+        /* REMOVE */
+        background: var(--midnight);
+    }
+
+    body {
+        font-size: 100%;
+        font-family: var(--font-family);
+        font-weight: var(--font-heavy);
+        margin: 0 auto;
+        min-height: 100vh;
+        width: 580px;
+        background: var(--app-bg);
+        color: var(--text-primary);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        overflow-x: hidden;
+    }
+
+    small {
+        font-size: var(--ms-1);
+        color: var(--text-secondary);
+    }
+
+    /* App header */
+    header {
+        margin-bottom: var(--padding-large);
+    }
+
+    h1 {
+        font-size: var(--ms2);
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    i.heading-icon {
+        color: var(--sunset);
+        font-size: var(--ms1);
+    }
+
+    h2 {
+        font-size: var(--ms1);
+        margin-bottom: var(--padding-small);
+    }
+    p{
+        margin-bottom: var(--padding-tiny);
+        line-height: 1.2;
+    }
+    p.subtitle{
+        color: var(--text-secondary);
+    }
+    .basic-button {
+        text-decoration: none;
+        cursor: pointer;
+        font-family: var(--font-family);
+        font-size: var(--font-size-body);
+        font-weight: 800;
+        padding: var(--padding-small);
+        background: var(--snow);
+        color: var(--text-primary);
+        box-shadow: var(--shadow-bold);
+        border: var(--default-border);
+        border-radius: var(--default-radius);
+        transition: all 0.2s ease;
+        white-space: nowrap;
+    }
+
+    button.basic-button:hover {
+        background: var(--amber);
+    }
+
+    button.basic-button:active {
+        box-shadow: none;
+    }
+
+    button.basic-button.disabled {
+        background: var(--amber-light);
+        cursor: not-allowed;
+        color: var(--midnight-light);
+        border: var(--border-subdued);
+        box-shadow: var(--shadow-bold);
+    }
+
+    /* App container (fills figma plugin wrapper) */
+    .app-container {
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: var(--padding-large);
+        overflow: scroll;
+    }
+
+    /* Global footer */
+    .footer {
+        padding: var(--padding-medium) 0;
+        border-top: 2px dashed var(--twilight-light);
+        display: flex;
+        flex-direction: row;
+        gap: var(--spacing-medium);
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .footer p {
+        color: var(--text-secondary);
+        font-weight: var(--heavy);
+    }
+
+    .feedback-button {
+        flex-grow: 2;
+    }
+
+    /* Global container and item rules */
+    .item {
+        border: var(--default-weight) solid var(--midnight-light);
+        border-radius: var(--default-radius);
+        padding: var(--padding-medium);
+    }
+
+    .item .step-label {
+        font-size: var(--ms1);
+    }
+
+    /* phaseOne form */
+    .form-container {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-medium);
+    }
+
+    /*======== phaseOne ==========*/
+    /* 
+        phaseOne step 1 
+        -User MUST select a figma frame
+        -Choosing a frame also enables the CTA buton
+        -When user has NOT selected a frame, apply style "frame-select-invalid"
+        -When user HAS selected a frame, apply style "frame-select-valid"
+        */
+    .frame-select {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .frame-select i.step-icon {
+        font-size: var(--font-size-heading);
+        color: var(--amethyst);
+    }
+
+    .frame-select-invalid i.step-icon {
+        display: none;
+    }
+
+    .frame-select-valid i.step-icon {
+        display: block;
+    }
+
+    /*
+        phaseOne step 2
+        -User MAY add context
+        -Context MUST be passed to the AI assistant if provided
+        */
+    .add-context {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-medium);
+    }
+
+    .add-context div:nth-of-type(even) {
+        border-radius: var(--default-radius);
+        padding: var(--padding-medium) 0 0 0;
+    }
+
+    textarea.context-input {
+        font-weight: 600;
+        width: 100%;
+        min-height: 60px;
+        border: none;
+        outline: none;
+        background: transparent;
+        font-family: var(--font-family);
+        font-size: var(--font-size-body);
+        color: var(--text-primary);
+        resize: none;
+    }
+
+    textarea::placeholder {
+        color: var(--text-secondary);
+    }
+
+    /* 
+            phaseOne step 3
+            -User MAY toggle "ignore repeated text"
+            -System MUST pass instruction to the agent to ignore text that repeats (commonly happens when a designer is building a design)
+            -No extra class on div.toggle-button = unchecked/off
+
+        */
+    .toggle-section {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .toggle-button {
+        border: var(--default-border);
+        border-color: var(--twilight-light);
+        border-radius: var(--default-radius);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        padding: 7px 33px 7px 7px;
+    }
+
+    .toggle-button.checked {
+        padding: 7px 7px 7px 33px;
+        background: var(--amber);
+        border-color: var(--midnight);
+    }
+
+    .toggle-icon::before {
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        font-size: var(--ms1);
+        content: '\f111';
+        /* fa-circle */
+    }
+
+    /* When toggled on (parent has .checked), switch icon */
+    .toggle-button.checked .toggle-icon::before {
+        content: '\f058';
+        /* fa-check-circle */
+    }
+
+    /*
+            phaseOne CTA
+
+        */
+    .cta-container {
+        text-align: center;
+        padding-top: var(--padding-medium);
+    }
+
+    .cta-button {
+        margin: 0 auto;
+        font-family: var(--font-family);
+        font-size: var(--font-size-heading);
+        font-weight: var(--font-heavy);
+        padding: var(--padding-medium);
+        box-shadow: var(--shadow-bold);
+        border-radius: var(--default-radius);
+        cursor: not-allowed;
+        transition: all 0.2s ease;
+    }
+
+    .cta-button.disabled {
+        background: var(--amber-light);
+        color: var(--midnight-light);
+        border: var(--border-subdued);
+    }
+
+    .cta-button.disabled i {
+        color: var(--sunset-light);
+    }
+
+    .cta-button.enabled {
+        background: var(--amber);
+        color: var(--midnight);
+        border: var(--default-border);
+        box-shadow: var(--shadow-bold);
+        cursor: pointer;
+    }
+
+    .cta-button.enabled i {
+        color: var(--midnight);
+    }
+
+    .cta-button.enabled:active {
+        box-shadow: none;
+    }
+
+    /*======== phaseTwo ==========*/
+
+
+    /* Loading State */
+    .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: var(--padding-large);
+        text-align: center;
+    }
+
+    .spinner {
+        display: grid;
+        grid-template-columns: repeat(3, 30px);
+        grid-template-rows: repeat(3, 30px);
+        gap: 6px;
+        margin: var(--padding-large) 0 0 0;
+    }
+
+    .spinner-box {
+        width: 36px;
+        height: 36px;
+        background: var(--snow);
+        border: var(--default-border);
+        border-radius: 6px;
+        transition: background-color 0.3s ease;
+    }
+
+    .spinner-box.active {
+        background: var(--sunset);
+    }
+
+    .status-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-medium);
+        margin-top: var(--spacing-large);
+    }
+
+    .status-item {
+        display: flex;
+        align-items: center;
+        flex-direction: row;
+        gap: var(--spacing-small);
+    }
+
+    .status-item::before {
+        content: '';
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        font-size: var(--ms1);
+        color: var(--midnight);
+    }
+
+    .status-item.complete .status-text {
+        color: var(--midnight);
+    }
+
+    .status-item.complete::before {
+        content: '\f058';
+        /* fa-check-circle */
+    }
+
+    .status-item.in-progress .status-text {
+        color: var(--sunset);
+    }
+
+    .status-item.in-progress::before {
+        content: '\e2ca';
+        /* fa-magic-wand-sparkles */
+        color: var(--sunset);
+    }
+
+    .status-item.waiting .status-text {
+        color: var(--twilight-light);
+    }
+
+    .status-item.waiting::before {
+        content: '\e2ca';
+        color: var(--twilight-light);
+        visibility: hidden;
+    }
+
+
+
+    /*=========== phaseThree =============*/
+
+
+    .results-container {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-small);
+        margin-bottom: var(--padding-medium);
+    }
+    .results-content{
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-small);
+    }
+    .results-card {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        border: var(--border-subdued);
+        border-radius: var(--default-radius);
+
+    }
+
+    header.results-card-header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--padding-tiny) var(--padding-small);
+        color: var(--midnight);
+        border-radius: var(--default-radius) var(--default-radius) 0 0;
+        margin: 0;
+    }
+
+    .results-card.nothing-returned {
+        border-color: var(--dark-mint);
+    }
+
+    .nothing-returned header.results-card-header {
+        background: var(--mint);
+    }
+
+    .results-card.error {
+        border-color: var(--tangerine);
+    }
+
+    .results-card.error header.results-card-header {
+        background: var(--tangerine-light);
+    }
+
+    header.results-card-header h3 {
+        font-size: var(--ms1);
+        color: var(--twilight);
+    }
+
+    header.results-card-header button {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        font-size: var(--ms1);
+        padding: 5px;
+        background: var(--snow);
+        border-radius: var(--default-radius);
+        border: var(--default-border);
+        box-shadow: var(--shadow-bold);
+        transition: all 0.2s ease;
+    }
+
+    header.results-card-header button:hover {
+        background: var(--amber-light);
+    }
+
+    header.results-card-header button:active {
+        background: var(--amber);
+        box-shadow: none;
+    }
+
+    .results-card p {
+        padding: var(--padding-small);
+        font-size: var(--font-size-body);
+        color: var(--text-primary);
+        font-weight: 500;
+        line-height: 1.3;
+    }
+
+    .results-card .content {
+        padding: var(--padding-small);
+        font-size: var(--font-size-body);
+        color: var(--text-primary);
+        font-weight: 500;
+        line-height: 1.3;
+    }
+    
+    .violation-section {
+        margin-bottom: 12px;
+        display: block;
+    }
+    
+    .violation-section:last-child {
+        margin-bottom: 0;
+    }
+    
+    .violation-section strong {
+        color: var(--twilight);
+        font-weight: 600;
+        display: inline;
+    }
+    
+    .violation-section span {
+        color: var(--text-primary);
+        font-weight: 500;
+        display: inline;
+    }
+
+    .crit-actions-container {
+        margin-bottom: var(--spacing-large);
+        display: flex;
+        flex-direction: row;
+        gap: var(--spacing-large);
+    }
+
+    /* Hidden state */
+    .hidden {
+        display: none !important;
+    }
+    </style>
 </head>
+
 <body>
+    <div class="app-container">
+        <div>
+            <!--phaseOne-->
+            <!--Form and Figma frame select-->
+            <div id="phaseOne" class="form-container">
+                <header>
+                    <h1><i class="heading-icon fas fa-wand-magic-sparkles"></i>&nbsp;Critique assistant</h1>
+                </header>
+                <!--
+                    phaseOne Step 1
+                    -User MUST select a figma frame
+                    -Choosing a frame also enables the CTA buton
+                    -When user has NOT selected a frame, apply style "frame-select-invalid"
+                    -When user HAS selected a frame, apply style "frame-select-valid"
+                -->
+                <div class="item frame-select frame-select-invalid" id="selectFrame">
+                    <div>
+                        <p class="step-label">Select a frame</p>
+                        <small>Required</small>
+                    </div>
+                    <div>
+                        <i class="step-icon fas fa-check-circle"></i>
+                    </div>
+                </div>
+                <!--
+                    phaseOne Step 2
+                    -User MAY add context
+                    -Context MUST be passed to the AI assistant if provided
+                -->
+                <div class="item add-context" id="addContext">
+                    <div>
+                        <p class="step-label">Add context</p>
+                        <small>Optional</small>
+                    </div>
+                    <div>
+                        <textarea class="context-input" id="contextInput" placeholder="Tell the agent what to focus on..."></textarea>
+                    </div>
+                </div>
+                <!--
+                    phaseOne Step 3
+                    -User MAY toggle "ignore repeated text"
+                    -System MUST pass instruction to the agent to ignore text that repeats (commonly happens when a designer is building a design)
+                -->
+                <div class="item toggle-section" id="toggleSection">
+                    <div>
+                        <p class="step-label">Ignore repeated text</p>
+                        <small>Optional</small>
+                    </div>
+                    <div class="toggle-button" id="toggleContainer">
+                        <i class="toggle-icon"></i>
+                    </div>
+                </div>
+                <div class="cta-container">
+                    <button class="cta-button disabled" id="ctaButton">
+                        <i class="fas fa-wand-magic-sparkles"></i>
+                        <span>Start critique</span>
+                    </button>
+                </div>
+            </div>
+            <!--phaseTwo-->
+            <!--Analyzing and loading phase-->
+            <div id="phaseTwo" class="loading-container hidden">
+                <header>
+                    <h2>Analyzing your design</h2>
+                    <p class="subtitle">This may take a while depending on the size of your selection.</p>
+                </header>
+                <div class="spinner" id="spinner">
+                    <div class="spinner-box"></div>
+                    <div class="spinner-box"></div>
+                    <div class="spinner-box"></div>
+                    <div class="spinner-box"></div>
+                    <div class="spinner-box"></div>
+                    <div class="spinner-box"></div>
+                    <div class="spinner-box"></div>
+                    <div class="spinner-box"></div>
+                    <div class="spinner-box"></div>
+                </div>
+                <div class="status-list">
+                    <!--
+                        There are three statuses to be respected:
+                        1. waiting = that action has not been started
+                        2. in-progress = the action is under way
+                        3. complete = the action is complete
+                        There are styles for each status
+                    -->
+                    <div class="status-item waiting" id="status1">
+                        <div class="status-text">Extracting design elements</div>
+                    </div>
+                    <div class="status-item waiting" id="status2">
+                        <div class="status-text">Serializing design nodes</div>
+                    </div>
+                    <div class="status-item waiting" id="status3">
+                        <div class="status-text">Sending to AI assistant</div>
+                    </div>
+                    <div class="status-item waiting" id="status4">
+                        <div class="status-text">Processing critique response</div>
+                    </div>
+                </div>
+            </div>
+            <!--phaseThree-->
+            <!--Results-->
+            <div id="phaseThree" class="results-container hidden">
+                <header>
+                    <h1><i class="heading-icon fas fa-wand-magic-sparkles"></i>&nbsp;Results</h1>
+                </header>
+                <div id="resultsContent" class="results-content">
+                    <!-- Dynamic content will be inserted here -->
+                </div>
+                <div class="crit-actions-container">
+                    <!--This button resets the form, if a frame is still selected, it keeps that select and the form is valid; if a frame is not selected, the form is not valid-->
+                    <button class="basic-button" id="startOverButton">
+                        <span>Start over</span>
+                    </button>
+                    <!--This button performs a critique based on the selected frame, if a frame is not selected, the button is disabled-->
+                    <button class="basic-button" id="critiqueAgainButton">
+                        <span>Critique again</span>
+                    </button>
+                </div>
+                <footer id="globalFooter" class="footer">
+                    <p>The AI agent is still in training. Your substantive feedback will help make this tool better.</p>
+                    <a class="feedback-button basic-button" href="https://forms.gle/NDnGg7RVjf4biB6g8" target="_blank">Give feedback</a>
+                </footer>
+            </div>
+        </div>
+    </div>
 
-<h1>Critique Assistant</h1>
+    <script>
+// UI-side JavaScript - handles user interactions and communicates with the main plugin code
+// This code runs in the browser context within the plugin UI
 
-<section id="before-container">
-  <h2>Step 1: select frames</h2>
-  <h2>Step 2: paste your PRD <small>(optional)</small></h2>
-  <div>
-    <label for="prd">Product Requirements Document</label>
-    <textarea id="prd" placeholder="Paste content..."></textarea>
-  </div>
-  <div>
-    <button id="analyzeBtn" class="primary-button">Start critique</button>
-  </div>
-</section>
+// State management
+let currentState = {
+  selectedFrames: [],
+  context: '',
+  ignoreRepeatedText: false,
+  analysisInProgress: false,
+  currentPhase: 'phaseOne' // phaseOne, phaseTwo, phaseThree
+};
 
-<section id="analyzing-container">
-  <div class="spinner"></div>
-  <div id="loading" class="status status-starting">Preparing…</div>
-  <div id="frameCount" style="margin-top: 6px; font-size: 0.9em;"></div>
-</section>
+// DOM element references
+const elements = {
+  // Phases
+  phaseOne: document.getElementById('phaseOne'),
+  phaseTwo: document.getElementById('phaseTwo'),
+  phaseThree: document.getElementById('phaseThree'),
+  
+  // Phase One elements
+  selectFrame: document.getElementById('selectFrame'),
+  contextInput: document.getElementById('contextInput'),
+  toggleContainer: document.getElementById('toggleContainer'),
+  ctaButton: document.getElementById('ctaButton'),
+  
+  // Phase Two elements (loading)
+  spinner: document.getElementById('spinner'),
+  status1: document.getElementById('status1'),
+  status2: document.getElementById('status2'),
+  status3: document.getElementById('status3'),
+  status4: document.getElementById('status4'),
+  
+  // Phase Three elements (results)
+  resultsContent: document.getElementById('resultsContent'),
+  startOverButton: document.getElementById('startOverButton'),
+  critiqueAgainButton: document.getElementById('critiqueAgainButton')
+};
 
-<section id="results-container">
-  <div id="output"></div>
-  <button id="restartBtn" class="primary-button">Critique again</button>
-</section>
+// Animation and timing constants
+const LOADING_ANIMATION_INTERVAL = 500; // ms
+const STATUS_UPDATE_DELAY = 1000; // ms
+let loadingAnimation = null;
+let statusUpdateTimeout = null;
 
-<script>
-  const assistant_id = "asst_PHFIBF9MDPXV6IfZOAxtUGnL";
-  const apiKey = "sk-proj-";
+// Initialize the plugin UI
+function initialize() {
+  console.log('UI - Initializing plugin...');
+  setupEventListeners();
+  updateUI();
+  animateSpinner();
+  
+  console.log('UI - Requesting initial state from main plugin');
+  // Request initial state from main plugin
+  parent.postMessage({ pluginMessage: { type: 'get-initial-state' } }, '*');
+  console.log('UI - Initial state request sent');
+}
 
-  function setVisibleSection(id) {
-    const sections = ["before-container", "analyzing-container", "results-container"];
-    sections.forEach(sid => {
-      document.getElementById(sid).style.display = (sid === id) ? "block" : "none";
+// Set up all event listeners
+function setupEventListeners() {
+  // Context input
+  elements.contextInput.addEventListener('input', (e) => {
+    currentState.context = e.target.value;
+    // Auto-resize textarea
+    e.target.style.height = 'auto';
+    e.target.style.height = (e.target.scrollHeight) + 'px';
+  });
+  
+  // Toggle button
+  elements.toggleContainer.addEventListener('click', () => {
+    currentState.ignoreRepeatedText = !currentState.ignoreRepeatedText;
+    updateToggleButton();
+  });
+  
+  // Main CTA button
+  elements.ctaButton.addEventListener('click', () => {
+    if (!elements.ctaButton.classList.contains('disabled')) {
+      startAnalysis();
+    }
+  });
+  
+  // Action buttons
+  elements.startOverButton.addEventListener('click', () => {
+    resetToPhaseOne();
+  });
+  
+  elements.critiqueAgainButton.addEventListener('click', () => {
+    if (currentState.selectedFrames.length > 0) {
+      startAnalysis();
+    }
+  });
+}
+
+// Update the UI based on current state
+function updateUI() {
+  updateFrameSelection();
+  updateToggleButton();
+  updateCTAButton();
+  updateCritiqueAgainButton();
+}
+
+// Update frame selection display - CRITICAL: This must work for plugin functionality
+function updateFrameSelection() {
+  const frameCount = currentState.selectedFrames.length;
+  
+  if (!elements.selectFrame) {
+    console.error('CRITICAL ERROR: selectFrame element not found!');
+    return;
+  }
+  
+  // Force immediate DOM update for frame selection state
+  if (frameCount > 0) {
+    // User has selected frames - show valid state
+    elements.selectFrame.classList.remove('frame-select-invalid');
+    elements.selectFrame.classList.add('frame-select-valid');
+  } else {
+    // No frames selected - show invalid state
+    elements.selectFrame.classList.remove('frame-select-valid');
+    elements.selectFrame.classList.add('frame-select-invalid');
+  }
+  
+  // Force browser to repaint the element
+  elements.selectFrame.offsetHeight;
+}
+
+// Update toggle button appearance
+function updateToggleButton() {
+  if (currentState.ignoreRepeatedText) {
+    elements.toggleContainer.classList.add('checked');
+  } else {
+    elements.toggleContainer.classList.remove('checked');
+  }
+}
+
+// Update CTA button state
+function updateCTAButton() {
+  if (currentState.selectedFrames.length > 0 && !currentState.analysisInProgress) {
+    elements.ctaButton.classList.remove('disabled');
+    elements.ctaButton.classList.add('enabled');
+  } else {
+    elements.ctaButton.classList.remove('enabled');
+    elements.ctaButton.classList.add('disabled');
+  }
+}
+
+// Update critique again button state
+function updateCritiqueAgainButton() {
+  if (currentState.selectedFrames.length > 0) {
+    elements.critiqueAgainButton.classList.remove('disabled');
+  } else {
+    elements.critiqueAgainButton.classList.add('disabled');
+  }
+}
+
+// Switch between phases
+function switchToPhase(phase) {
+  currentState.currentPhase = phase;
+  
+  // Hide all phases
+  elements.phaseOne.classList.add('hidden');
+  elements.phaseTwo.classList.add('hidden');
+  elements.phaseThree.classList.add('hidden');
+  
+  // Show the requested phase
+  switch (phase) {
+    case 'phaseOne':
+      elements.phaseOne.classList.remove('hidden');
+      break;
+    case 'phaseTwo':
+      elements.phaseTwo.classList.remove('hidden');
+      startLoadingAnimation();
+      break;
+    case 'phaseThree':
+      elements.phaseThree.classList.remove('hidden');
+      stopLoadingAnimation();
+      break;
+  }
+}
+
+// Start the analysis process
+function startAnalysis() {
+  if (currentState.selectedFrames.length === 0) {
+    parent.postMessage({ 
+      pluginMessage: { 
+        type: 'show-notification',
+        message: 'Please select at least one frame to analyze.'
+      }
+    }, '*');
+    return;
+  }
+  
+  currentState.analysisInProgress = true;
+  updateCTAButton();
+  
+  // Switch to loading phase
+  switchToPhase('phaseTwo');
+  
+  // Reset loading status
+  resetLoadingStatus();
+  
+  // Send analysis request to main plugin
+  parent.postMessage({ 
+    pluginMessage: { 
+      type: 'analyze-frames',
+      context: currentState.context,
+      ignoreRepeatedText: currentState.ignoreRepeatedText
+    }
+  }, '*');
+}
+
+// Animate the spinner
+function animateSpinner() {
+  const spinnerBoxes = elements.spinner.querySelectorAll('.spinner-box');
+  let activeIndex = 0;
+  
+  loadingAnimation = setInterval(() => {
+    // Remove active class from all boxes
+    spinnerBoxes.forEach(box => box.classList.remove('active'));
+    
+    // Add active class to current box
+    if (spinnerBoxes[activeIndex]) {
+      spinnerBoxes[activeIndex].classList.add('active');
+    }
+    
+    // Move to next box
+    activeIndex = (activeIndex + 1) % spinnerBoxes.length;
+  }, LOADING_ANIMATION_INTERVAL);
+}
+
+// Start loading animation and status updates
+function startLoadingAnimation() {
+  if (!loadingAnimation) {
+    animateSpinner();
+  }
+  
+  // Progressive status updates with proper class management
+  setTimeout(() => {
+    updateLoadingStatus('status1', 'in-progress');
+    setTimeout(() => updateLoadingStatus('status1', 'complete'), 300);
+  }, 500);
+  
+  setTimeout(() => {
+    updateLoadingStatus('status2', 'in-progress'); 
+    setTimeout(() => updateLoadingStatus('status2', 'complete'), 800);
+  }, 1500);
+  
+  setTimeout(() => {
+    updateLoadingStatus('status3', 'in-progress');
+    setTimeout(() => updateLoadingStatus('status3', 'complete'), 1000);
+  }, 2500);
+  
+  setTimeout(() => {
+    updateLoadingStatus('status4', 'in-progress');
+  }, 4000);
+}
+
+// Stop loading animation
+function stopLoadingAnimation() {
+  if (loadingAnimation) {
+    clearInterval(loadingAnimation);
+    loadingAnimation = null;
+  }
+  
+  // Clear all active spinner boxes
+  const spinnerBoxes = elements.spinner.querySelectorAll('.spinner-box');
+  spinnerBoxes.forEach(box => box.classList.remove('active'));
+}
+
+// Reset loading status to initial state
+function resetLoadingStatus() {
+  const statusItems = [elements.status1, elements.status2, elements.status3, elements.status4];
+  statusItems.forEach(item => {
+    item.className = 'status-item waiting';
+  });
+}
+
+// Update loading status with proper class management
+function updateLoadingStatus(statusId, status) {
+  const statusElement = elements[statusId];
+  if (statusElement) {
+    // Remove all previous status classes
+    statusElement.classList.remove('waiting', 'in-progress', 'complete');
+    // Add the new status class
+    statusElement.classList.add(status);
+  }
+}
+
+// Display analysis results
+function showResults(result) {
+  console.log('SHOW RESULTS - Called with result:', result);
+  currentState.analysisInProgress = false;
+  
+  // Complete all status items
+  updateLoadingStatus('status4', 'complete');
+  console.log('SHOW RESULTS - Updated status to complete');
+  
+  // Wait a moment then switch to results
+  setTimeout(() => {
+    console.log('SHOW RESULTS - Switching to phaseThree and populating results');
+    switchToPhase('phaseThree');
+    populateResults(result);
+    updateUI();
+    console.log('SHOW RESULTS - Results display complete');
+  }, 1000);
+}
+
+// Populate results content
+function populateResults(result) {
+  console.log('POPULATE RESULTS - Starting with result:', result);
+  elements.resultsContent.innerHTML = '';
+  
+  // Handle different types of results
+  if (result.error) {
+    console.log('POPULATE RESULTS - Error case detected');
+    // Error case
+    const errorCard = createResultCard({
+      title: 'Could not get results',
+      content: result.error,
+      type: 'error'
+    });
+    elements.resultsContent.appendChild(errorCard);
+    return;
+  }
+  
+  // Try to parse rawFeedback if it's a JSON string containing violations
+  let violations = [];
+  console.log('POPULATE RESULTS - Checking rawFeedback for JSON violations');
+  console.log('POPULATE RESULTS - rawFeedback type:', typeof result.rawFeedback);
+  console.log('POPULATE RESULTS - rawFeedback content:', result.rawFeedback);
+  
+  if (result.rawFeedback && typeof result.rawFeedback === 'string') {
+    try {
+      console.log('POPULATE RESULTS - Attempting to parse rawFeedback as JSON');
+      
+      // STRATEGY 1: Try to parse as direct JSON array first
+      try {
+        const directParsed = JSON.parse(result.rawFeedback);
+        console.log('POPULATE RESULTS - Direct JSON parse successful:', directParsed);
+        
+        if (Array.isArray(directParsed)) {
+          console.log('POPULATE RESULTS - Found direct JSON array with', directParsed.length, 'items');
+          violations = directParsed;
+          console.log('POPULATE RESULTS - Using direct violations array:', violations);
+        }
+      } catch (directParseError) {
+        console.log('POPULATE RESULTS - Direct JSON parse failed, trying extraction method');
+      }
+      
+      // STRATEGY 2: Extract JSON from wrapper if direct parse failed
+      if (violations.length === 0) {
+        const jsonMatch = result.rawFeedback.match(/\{.*\}/s);
+        console.log('POPULATE RESULTS - JSON match found:', !!jsonMatch);
+        
+        if (jsonMatch) {
+          console.log('POPULATE RESULTS - JSON match content:', jsonMatch[0]);
+          const parsedData = JSON.parse(jsonMatch[0]);
+          console.log('POPULATE RESULTS - Parsed JSON data:', parsedData);
+          
+          if (parsedData.content) {
+            console.log('POPULATE RESULTS - Found content in parsed data');
+            // Parse the content string which contains the actual violations
+            const contentStr = parsedData.content;
+            console.log('POPULATE RESULTS - Content string:', contentStr);
+            
+            // Split by violation patterns and process each
+            const violationMatches = contentStr.split(/(?=\\n\\n\\\"violation\\\")/);
+            console.log('POPULATE RESULTS - Violation matches found:', violationMatches.length);
+            
+            for (let i = 0; i < violationMatches.length; i++) {
+              const match = violationMatches[i];
+              console.log(`POPULATE RESULTS - Processing violation match ${i}:`, match);
+              
+              if (match.includes('"violation"')) {
+                try {
+                  // Clean up the string and extract violation data
+                  const cleanMatch = match.replace(/\\n/g, '').replace(/\\\"/g, '"');
+                  console.log(`POPULATE RESULTS - Clean match ${i}:`, cleanMatch);
+                
+                  const violationMatch = cleanMatch.match(/"violation":"([^"]+)"/);
+                  const trapMatch = cleanMatch.match(/"trap":"([^"]+)"/);
+                  const contextMatch = cleanMatch.match(/"context":"([^"]+)"/);
+                  const impactMatch = cleanMatch.match(/"impact":"([^"]+)"/);
+                  const suggestedFixMatch = cleanMatch.match(/"suggested_fix":"([^"]+)"/);
+                  const locationMatch = cleanMatch.match(/"location":"([^"]+)"/);
+                  const tenetMatch = cleanMatch.match(/"tenet":"([^"]+)"/);
+                  
+                  console.log(`POPULATE RESULTS - Extracted data ${i}:`, {
+                    violation: violationMatch ? violationMatch[1] : null,
+                    trap: trapMatch ? trapMatch[1] : null,
+                    context: contextMatch ? contextMatch[1] : null,
+                    impact: impactMatch ? impactMatch[1] : null,
+                    suggestedFix: suggestedFixMatch ? suggestedFixMatch[1] : null,
+                    location: locationMatch ? locationMatch[1] : null,
+                    tenet: tenetMatch ? tenetMatch[1] : null
+                  });
+                  
+                  // Use trap or violation for the title, prefer trap if available
+                  var title = (trapMatch ? trapMatch[1] : '') || (violationMatch ? violationMatch[1] : '');
+                  
+                  if (title) {
+                    violations.push({
+                      violation: title,
+                      trap: trapMatch ? trapMatch[1] : '',
+                      context: contextMatch ? contextMatch[1] : '',
+                      impact: impactMatch ? impactMatch[1] : '',
+                      suggested_fix: suggestedFixMatch ? suggestedFixMatch[1] : '',
+                      location: locationMatch ? locationMatch[1] : '',
+                      tenet: tenetMatch ? tenetMatch[1] : ''
+                    });
+                  }
+                } catch (e) {
+                  console.warn('POPULATE RESULTS - Could not parse individual violation:', e);
+                }
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('POPULATE RESULTS - Could not parse rawFeedback as JSON:', e);
+    }
+  }
+  
+  console.log('POPULATE RESULTS - Final violations array:', violations);
+  console.log('POPULATE RESULTS - Number of violations found:', violations.length);
+  
+  // If we found violations, create individual cards for each (NO SUMMARY)
+  if (violations.length > 0) {
+    console.log('POPULATE RESULTS - Creating violation cards');
+    violations.forEach((violation, index) => {
+      console.log(`POPULATE RESULTS - Creating card for violation ${index}:`, violation);
+      const card = createViolationCard({
+        title: violation.violation || violation.trap || `Issue ${index + 1}`,
+        context: violation.context,
+        impact: violation.impact,
+        suggestedFix: violation.suggested_fix,
+        location: violation.location
+      });
+      elements.resultsContent.appendChild(card);
+    });
+    return;
+  }
+  
+  // Check if we have meaningful content in other formats
+  const hasContent = (
+    (result.strengths && result.strengths.length > 0) ||
+    (result.improvements && result.improvements.length > 0) ||
+    (result.accessibility && result.accessibility.length > 0) ||
+    (result.recommendations && result.recommendations.length > 0)
+  );
+  
+  console.log('POPULATE RESULTS - Has structured content:', hasContent);
+  
+  if (!hasContent) {
+    console.log('POPULATE RESULTS - No meaningful content, showing fallback');
+    // No meaningful feedback case
+    const cleanCard = createResultCard({
+      title: 'Great work!',
+      content: 'The AI agent didn\'t find any specific issues in your design.',
+      type: 'nothing-returned'
+    });
+    elements.resultsContent.appendChild(cleanCard);
+    return;
+  }
+  
+  // Create result cards for each category (NO SUMMARY as requested)
+  console.log('POPULATE RESULTS - Creating structured content cards');
+  
+  if (result.improvements && result.improvements.length > 0) {
+    console.log('POPULATE RESULTS - Creating improvement cards');
+    for (var i = 0; i < result.improvements.length; i++) {
+      var improvement = result.improvements[i];
+      var content = '';
+      var title = 'Improvement ' + (i + 1);
+      
+      console.log('PROCESSING IMPROVEMENT:', improvement);
+      console.log('IMPROVEMENT TYPE:', typeof improvement);
+      
+      if (typeof improvement === 'object' && improvement !== null) {
+        // Use trap as the title if available
+        if (improvement.trap) {
+          title = improvement.trap;
+        }
+        
+        // Handle structured improvement objects
+        if (improvement.description) {
+          content = improvement.description;
+        }
+        if (improvement.suggested_fix) {
+          content += (content ? '\n\nSuggested fix: ' : '') + improvement.suggested_fix;
+        }
+        if (improvement.location) {
+          content += (content ? '\n\nLocation: ' : '') + improvement.location;
+        }
+        if (improvement.impact) {
+          content += (content ? '\n\nImpact: ' : '') + improvement.impact;
+        }
+        if (improvement.tenet) {
+          content += (content ? '\n\nDesign principle: ' : '') + improvement.tenet;
+        }
+        
+        // Fallback if no content found
+        if (!content) {
+          console.log('NO CONTENT FOUND, USING JSON STRINGIFY');
+          content = JSON.stringify(improvement, null, 2);
+        }
+      } else if (typeof improvement === 'string') {
+        content = improvement;
+      } else {
+        console.log('UNKNOWN IMPROVEMENT TYPE, CONVERTING TO STRING');
+        content = String(improvement);
+      }
+      
+      console.log('FINAL TITLE:', title);
+      console.log('FINAL CONTENT:', content);
+      
+      var improvementCard = createResultCard({
+        title: title,
+        content: content,
+        type: 'normal'
+      });
+      elements.resultsContent.appendChild(improvementCard);
+    }
+  }
+  
+  if (result.strengths && result.strengths.length > 0) {
+    console.log('POPULATE RESULTS - Creating strength cards');
+    result.strengths.forEach((strength, index) => {
+      const strengthCard = createResultCard({
+        title: `Strength ${index + 1}`,
+        content: strength,
+        type: 'normal'
+      });
+      elements.resultsContent.appendChild(strengthCard);
     });
   }
-
-  function highlightNode(id) {
-    parent.postMessage({ pluginMessage: { type: "highlight", nodeId: id } }, "*");
+  
+  if (result.accessibility && result.accessibility.length > 0) {
+    console.log('POPULATE RESULTS - Creating accessibility cards');
+    result.accessibility.forEach((accessibilityItem, index) => {
+      const accessibilityCard = createResultCard({
+        title: `Accessibility Issue ${index + 1}`,
+        content: accessibilityItem,
+        type: 'normal'
+      });
+      elements.resultsContent.appendChild(accessibilityCard);
+    });
   }
-
-  function renderBadge(sev) {
-    if (!sev) return "";
-    const cls = sev.toLowerCase();
-    return `<span class="badge ${cls}">${sev}</span>`;
+  
+  if (result.recommendations && result.recommendations.length > 0) {
+    console.log('POPULATE RESULTS - Creating recommendation cards');
+    result.recommendations.forEach((recommendation, index) => {
+      const recommendationCard = createResultCard({
+        title: `Recommendation ${index + 1}`,
+        content: recommendation,
+        type: 'normal'
+      });
+      elements.resultsContent.appendChild(recommendationCard);
+    });
   }
+  
+  console.log('POPULATE RESULTS - Finished populating results');
+}
 
-  function renderIssues(issues) {
-    const grouped = { High: [], Medium: [], Low: [], Unknown: [] };
-    for (const i of issues) {
-      const level = i.severity || "Unknown";
-      grouped[level]?.push(i);
-    }
-
-    let html = "";
-    for (const level of ["High", "Medium", "Low", "Unknown"]) {
-      const list = grouped[level];
-      if (list.length === 0) continue;
-      html += `<h3>${level} Severity (${list.length})</h3>`;
-      for (const i of list) {
-        const title = i.type === "trap"
-          ? `<strong>Trap: ${i.trap_name}</strong><br><em>Tenet: ${i.tenet_name}</em>`
-          : `<strong>Heuristic: ${i.heuristic_name}</strong>`;
-        const btn = i.nodeId
-          ? `<button class="reveal-button" onclick="highlightNode('${i.nodeId}')">Reveal</button>` : "";
-        html += `<div class="card">${title}<br>${renderBadge(i.severity)}<br><p>${i.description}</p>${btn}</div>`;
+// Create a result card element
+function createResultCard({ title, content, type = 'normal' }) {
+  console.log('CREATE RESULT CARD - Creating card with:', { title, content, type });
+  
+  const card = document.createElement('div');
+  card.className = `results-card ${type}`;
+  
+  const header = document.createElement('header');
+  header.className = 'results-card-header';
+  
+  const h3 = document.createElement('h3');
+  h3.textContent = title;
+  
+  const button = document.createElement('button');
+  button.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i>';
+  button.addEventListener('click', () => {
+    // Send message to highlight/focus the related nodes in Figma
+    parent.postMessage({ 
+      pluginMessage: { 
+        type: 'focus-selected-frames'
       }
-    }
-    return html;
-  }
+    }, '*');
+  });
+  
+  header.appendChild(h3);
+  header.appendChild(button);
+  
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'content';
+  
+  const p = document.createElement('p');
+  p.textContent = content;
+  
+  contentDiv.appendChild(p);
+  card.appendChild(header);
+  card.appendChild(contentDiv);
+  
+  console.log('CREATE RESULT CARD - Created card element');
+  return card;
+}
 
-  function summarize(issues) {
-    const bullets = issues.slice(0, 5).map(i => `• ${i.description}`).join("<br>");
-    return `<div class="summary card"><strong>Summary:</strong><br>${bullets}</div>`;
-  }
-
-  function startAnalysis() {
-    setVisibleSection("analyzing-container");
-    document.getElementById("output").innerHTML = "";
-    document.getElementById("loading").innerText = "Starting analysis pipeline...";
-    document.getElementById("frameCount").innerText = "";
-    parent.postMessage({ pluginMessage: { type: "trigger-analysis" } }, "*");
-  }
-
-  document.getElementById("analyzeBtn").onclick = startAnalysis;
-  document.getElementById("restartBtn").onclick = () => setVisibleSection("before-container");
-
-  window.onload = () => setVisibleSection("before-container");
-
-  window.onmessage = async (event) => {
-    const data = event.data.pluginMessage;
-    if (!data || data.type !== "design-data") return;
-
-    try {
-      const prd = document.getElementById("prd").value;
-      const input = JSON.stringify({ design: data.payload, prd: prd || null });
-
-      setVisibleSection("analyzing-container");
-
-      const frameCount = data.payload?.children?.length || 1;
-      document.getElementById("frameCount").innerText = `${frameCount} frame${frameCount === 1 ? "" : "s"} selected`;
-
-      const headers = {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-        "OpenAI-Beta": "assistants=v2"
-      };
-
-      const threadRes = await fetch("https://api.openai.com/v1/threads", {
-        method: "POST", headers, body: JSON.stringify({})
-      });
-      if (!threadRes.ok) throw new Error("Failed to create thread");
-      const thread = await threadRes.json();
-      document.getElementById("loading").innerText = "Thread created...";
-
-      await fetch(`https://api.openai.com/v1/threads/${thread.id}/messages`, {
-        method: "POST", headers,
-        body: JSON.stringify({ role: "user", content: input })
-      });
-      document.getElementById("loading").innerText = "Message sent...";
-
-      const runRes = await fetch(`https://api.openai.com/v1/threads/${thread.id}/runs`, {
-        method: "POST", headers,
-        body: JSON.stringify({ assistant_id })
-      });
-      if (!runRes.ok) throw new Error("Failed to start run");
-      const run = await runRes.json();
-      document.getElementById("loading").innerText = "Run started...";
-
-      let dotCount = 0;
-      while (true) {
-        const statusRes = await fetch(`https://api.openai.com/v1/threads/${thread.id}/runs/${run.id}`, { headers });
-        const status = await statusRes.json();
-        const loadingEl = document.getElementById("loading");
-
-        if (status.status === "queued") {
-          loadingEl.innerText = "Queued — waiting on OpenAI...";
-        } else if (status.status === "in_progress") {
-          loadingEl.innerText = `Analyzing${'.'.repeat(dotCount % 4)}`;
-          dotCount++;
-        } else if (status.status === "completed") {
-          loadingEl.innerText = "Complete!";
-          break;
-        } else if (status.status === "failed") {
-          loadingEl.innerText = "❌ Run failed";
-          throw new Error("Run failed");
+// Create a violation-specific card element matching the exact design structure
+function createViolationCard({ title, context, impact, suggestedFix, location }) {
+  console.log('CREATE VIOLATION CARD - Creating violation card with:', { title, context, impact, suggestedFix, location });
+  
+  const card = document.createElement('div');
+  card.className = 'results-card';
+  
+  const header = document.createElement('header');
+  header.className = 'results-card-header';
+  
+  // violation -> h3
+  const h3 = document.createElement('h3');
+  h3.textContent = title;
+  
+  // location -> button  
+  const button = document.createElement('button');
+  button.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i>';
+  button.addEventListener('click', () => {
+    // Send message to highlight specific nodes related to this violation
+    // Request deep node analysis for more precise targeting
+    parent.postMessage({ 
+      pluginMessage: { 
+        type: 'focus-violation-area',
+        violationContext: {
+          title: title,
+          context: context,
+          impact: impact,
+          location: location
         }
-
-        await new Promise(r => setTimeout(r, 1000));
       }
+    }, '*');
+  });
+  
+  header.appendChild(h3);
+  header.appendChild(button);
+  
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'content';
+  
+  // context -> p
+  if (context) {
+    const contextP = document.createElement('p');
+    contextP.textContent = context;
+    contentDiv.appendChild(contextP);
+  }
+  
+  // impact -> p  
+  if (impact) {
+    const impactP = document.createElement('p');
+    impactP.textContent = impact;
+    contentDiv.appendChild(impactP);
+  }
+  
+  card.appendChild(header);
+  card.appendChild(contentDiv);
+  
+  console.log('CREATE VIOLATION CARD - Created violation card element');
+  return card;
+}
 
-      const messagesRes = await fetch(`https://api.openai.com/v1/threads/${thread.id}/messages`, { headers });
-      const messages = await messagesRes.json();
-      const content = messages.data.find(m => m.role === "assistant")?.content?.[0]?.text?.value;
-      const parsed = JSON.parse(content);
+// Show error state
+function showError(error) {
+  currentState.analysisInProgress = false;
+  updateUI();
+  
+  // If we're in phase one, just show a notification
+  if (currentState.currentPhase === 'phaseOne') {
+    parent.postMessage({ 
+      pluginMessage: { 
+        type: 'show-notification',
+        message: error
+      }
+    }, '*');
+    return;
+  }
+  
+  // If we're in loading phase, switch to results with error
+  switchToPhase('phaseThree');
+  showResults({ error: error });
+}
 
-      document.getElementById("output").innerHTML =
-        (Array.isArray(parsed) && parsed.length === 0)
-        ? `<div style="color:MediumSeaGreen;"><strong>No issues found 🎉</strong></div>`
-        : summarize(parsed) + renderIssues(parsed);
+// Reset to phase one
+function resetToPhaseOne() {
+  currentState.analysisInProgress = false;
+  currentState.context = '';
+  currentState.ignoreRepeatedText = false;
+  
+  // Reset form
+  elements.contextInput.value = '';
+  elements.contextInput.style.height = 'auto';
+  updateUI();
+  
+  // Switch to phase one
+  switchToPhase('phaseOne');
+}
 
-      setVisibleSection("results-container");
+// Handle messages from the main plugin thread
+window.onmessage = (event) => {
+  console.log('UI - Received window message event:', event);
+  
+  if (!event.data) {
+    console.log('UI - No data in message event');
+    return;
+  }
+  
+  const message = event.data.pluginMessage;
+  if (!message) {
+    console.log('UI - No pluginMessage in event data');
+    return;
+  }
+  
+  console.log('UI - Processing plugin message:', message);
+  
+  switch (message.type) {
+    case 'selection-changed':
+      console.log('UI - SELECTION-CHANGED MESSAGE RECEIVED');
+      console.log('UI - Message frames:', message.frames);
+      currentState.selectedFrames = message.frames || [];
+      console.log('UI - Updated currentState.selectedFrames:', currentState.selectedFrames);
+      updateFrameSelection();
+      updateCTAButton();
+      updateCritiqueAgainButton();
+      break;
+      
+    case 'analysis-started':
+      console.log('UI - ANALYSIS-STARTED MESSAGE RECEIVED');
+      // Continue with loading state
+      break;
+      
+    case 'analysis-complete':
+      console.log('UI - ANALYSIS-COMPLETE MESSAGE RECEIVED');
+      console.log('UI - Raw message:', message);
+      console.log('UI - Message result:', message.result);
+      showResults(message.result);
+      break;
+      
+    case 'analysis-error':
+      console.log('UI - ANALYSIS-ERROR MESSAGE RECEIVED');
+      console.log('UI - Error:', message.error);
+      showError(message.error);
+      break;
+      
+    default:
+      console.log('UI - Unknown message type:', message.type);
+  }
+};
 
-    } catch (err) {
-      console.error("❌ GPT error:", err);
-      document.getElementById("output").innerHTML =
-        `<div style="color:red;"><strong>Error:</strong> ${err.message}</div>`;
-      setVisibleSection("results-container");
-    }
-  };
-</script>
+// Error handling for uncaught errors
+window.onerror = (msg, url, line, col, error) => {
+  console.error('UI Error:', { msg, url, line, col, error });
+  showError('An unexpected error occurred in the plugin interface.');
+};
 
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initialize);
+} else {
+  initialize();
+}
+    </script>
 </body>
+
 </html>
