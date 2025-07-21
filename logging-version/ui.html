@@ -887,15 +887,15 @@ let statusUpdateTimeout = null;
 
 // Initialize the plugin UI
 function initialize() {
-  
+  console.log('UI - Initializing plugin...');
   setupEventListeners();
   updateUI();
   animateSpinner();
   
-  
+  console.log('UI - Requesting initial state from main plugin');
   // Request initial state from main plugin
   parent.postMessage({ pluginMessage: { type: 'get-initial-state' } }, '*');
-  
+  console.log('UI - Initial state request sent');
 }
 
 // Set up all event listeners
@@ -1129,31 +1129,31 @@ function updateLoadingStatus(statusId, status) {
 
 // Display analysis results
 function showResults(result) {
-  
+  console.log('SHOW RESULTS - Called with result:', result);
   currentState.analysisInProgress = false;
   
   // Complete all status items
   updateLoadingStatus('status4', 'complete');
-  
+  console.log('SHOW RESULTS - Updated status to complete');
   
   // Wait a moment then switch to results
   setTimeout(() => {
-    
+    console.log('SHOW RESULTS - Switching to phaseThree and populating results');
     switchToPhase('phaseThree');
     populateResults(result);
     updateUI();
-    
+    console.log('SHOW RESULTS - Results display complete');
   }, 1000);
 }
 
 // Populate results content
 function populateResults(result) {
-  
+  console.log('POPULATE RESULTS - Starting with result:', result);
   elements.resultsContent.innerHTML = '';
   
   // Handle different types of results
   if (result.error) {
-    
+    console.log('POPULATE RESULTS - Error case detected');
     // Error case
     const errorCard = createResultCard({
       title: 'Could not get results',
@@ -1166,57 +1166,57 @@ function populateResults(result) {
   
   // Try to parse rawFeedback if it's a JSON string containing violations
   let violations = [];
-  
-  
-  
+  console.log('POPULATE RESULTS - Checking rawFeedback for JSON violations');
+  console.log('POPULATE RESULTS - rawFeedback type:', typeof result.rawFeedback);
+  console.log('POPULATE RESULTS - rawFeedback content:', result.rawFeedback);
   
   if (result.rawFeedback && typeof result.rawFeedback === 'string') {
     try {
-      
+      console.log('POPULATE RESULTS - Attempting to parse rawFeedback as JSON');
       
       // STRATEGY 1: Try to parse as direct JSON array first
       try {
         const directParsed = JSON.parse(result.rawFeedback);
-        
+        console.log('POPULATE RESULTS - Direct JSON parse successful:', directParsed);
         
         if (Array.isArray(directParsed)) {
-          
+          console.log('POPULATE RESULTS - Found direct JSON array with', directParsed.length, 'items');
           violations = directParsed;
-          
+          console.log('POPULATE RESULTS - Using direct violations array:', violations);
         }
       } catch (directParseError) {
-        
+        console.log('POPULATE RESULTS - Direct JSON parse failed, trying extraction method');
       }
       
       // STRATEGY 2: Extract JSON from wrapper if direct parse failed
       if (violations.length === 0) {
         const jsonMatch = result.rawFeedback.match(/\{.*\}/s);
-        
+        console.log('POPULATE RESULTS - JSON match found:', !!jsonMatch);
         
         if (jsonMatch) {
-          
+          console.log('POPULATE RESULTS - JSON match content:', jsonMatch[0]);
           const parsedData = JSON.parse(jsonMatch[0]);
-          
+          console.log('POPULATE RESULTS - Parsed JSON data:', parsedData);
           
           if (parsedData.content) {
-            
+            console.log('POPULATE RESULTS - Found content in parsed data');
             // Parse the content string which contains the actual violations
             const contentStr = parsedData.content;
-            
+            console.log('POPULATE RESULTS - Content string:', contentStr);
             
             // Split by violation patterns and process each
             const violationMatches = contentStr.split(/(?=\\n\\n\\\"violation\\\")/);
-            
+            console.log('POPULATE RESULTS - Violation matches found:', violationMatches.length);
             
             for (let i = 0; i < violationMatches.length; i++) {
               const match = violationMatches[i];
-              
+              console.log(`POPULATE RESULTS - Processing violation match ${i}:`, match);
               
               if (match.includes('"violation"')) {
                 try {
                   // Clean up the string and extract violation data
                   const cleanMatch = match.replace(/\\n/g, '').replace(/\\\"/g, '"');
-                  
+                  console.log(`POPULATE RESULTS - Clean match ${i}:`, cleanMatch);
                 
                   const violationMatch = cleanMatch.match(/"violation":"([^"]+)"/);
                   const trapMatch = cleanMatch.match(/"trap":"([^"]+)"/);
@@ -1263,14 +1263,14 @@ function populateResults(result) {
     }
   }
   
-  
-  
+  console.log('POPULATE RESULTS - Final violations array:', violations);
+  console.log('POPULATE RESULTS - Number of violations found:', violations.length);
   
   // If we found violations, create individual cards for each (NO SUMMARY)
   if (violations.length > 0) {
-    
+    console.log('POPULATE RESULTS - Creating violation cards');
     violations.forEach((violation, index) => {
-      
+      console.log(`POPULATE RESULTS - Creating card for violation ${index}:`, violation);
       const card = createViolationCard({
         title: violation.violation || violation.trap || `Issue ${index + 1}`,
         context: violation.context,
@@ -1291,10 +1291,10 @@ function populateResults(result) {
     (result.recommendations && result.recommendations.length > 0)
   );
   
-  
+  console.log('POPULATE RESULTS - Has structured content:', hasContent);
   
   if (!hasContent) {
-    
+    console.log('POPULATE RESULTS - No meaningful content, showing fallback');
     // No meaningful feedback case
     const cleanCard = createResultCard({
       title: 'Great work!',
@@ -1306,17 +1306,17 @@ function populateResults(result) {
   }
   
   // Create result cards for each category (NO SUMMARY as requested)
-  
+  console.log('POPULATE RESULTS - Creating structured content cards');
   
   if (result.improvements && result.improvements.length > 0) {
-    
+    console.log('POPULATE RESULTS - Creating improvement cards');
     for (var i = 0; i < result.improvements.length; i++) {
       var improvement = result.improvements[i];
       var content = '';
       var title = 'Improvement ' + (i + 1);
       
-      
-      
+      console.log('PROCESSING IMPROVEMENT:', improvement);
+      console.log('IMPROVEMENT TYPE:', typeof improvement);
       
       if (typeof improvement === 'object' && improvement !== null) {
         // Use trap as the title if available
@@ -1343,18 +1343,18 @@ function populateResults(result) {
         
         // Fallback if no content found
         if (!content) {
-          
+          console.log('NO CONTENT FOUND, USING JSON STRINGIFY');
           content = JSON.stringify(improvement, null, 2);
         }
       } else if (typeof improvement === 'string') {
         content = improvement;
       } else {
-        
+        console.log('UNKNOWN IMPROVEMENT TYPE, CONVERTING TO STRING');
         content = String(improvement);
       }
       
-      
-      
+      console.log('FINAL TITLE:', title);
+      console.log('FINAL CONTENT:', content);
       
       var improvementCard = createResultCard({
         title: title,
@@ -1366,7 +1366,7 @@ function populateResults(result) {
   }
   
   if (result.strengths && result.strengths.length > 0) {
-    
+    console.log('POPULATE RESULTS - Creating strength cards');
     result.strengths.forEach((strength, index) => {
       const strengthCard = createResultCard({
         title: `Strength ${index + 1}`,
@@ -1378,7 +1378,7 @@ function populateResults(result) {
   }
   
   if (result.accessibility && result.accessibility.length > 0) {
-    
+    console.log('POPULATE RESULTS - Creating accessibility cards');
     result.accessibility.forEach((accessibilityItem, index) => {
       const accessibilityCard = createResultCard({
         title: `Accessibility Issue ${index + 1}`,
@@ -1390,7 +1390,7 @@ function populateResults(result) {
   }
   
   if (result.recommendations && result.recommendations.length > 0) {
-    
+    console.log('POPULATE RESULTS - Creating recommendation cards');
     result.recommendations.forEach((recommendation, index) => {
       const recommendationCard = createResultCard({
         title: `Recommendation ${index + 1}`,
@@ -1401,12 +1401,12 @@ function populateResults(result) {
     });
   }
   
-  
+  console.log('POPULATE RESULTS - Finished populating results');
 }
 
 // Create a result card element
 function createResultCard({ title, content, type = 'normal' }) {
-  
+  console.log('CREATE RESULT CARD - Creating card with:', { title, content, type });
   
   const card = document.createElement('div');
   card.className = `results-card ${type}`;
@@ -1441,13 +1441,13 @@ function createResultCard({ title, content, type = 'normal' }) {
   card.appendChild(header);
   card.appendChild(contentDiv);
   
-  
+  console.log('CREATE RESULT CARD - Created card element');
   return card;
 }
 
 // Create a violation-specific card element matching the exact design structure
 function createViolationCard({ title, context, impact, suggestedFix, location }) {
-  
+  console.log('CREATE VIOLATION CARD - Creating violation card with:', { title, context, impact, suggestedFix, location });
   
   const card = document.createElement('div');
   card.className = 'results-card';
@@ -1501,7 +1501,7 @@ function createViolationCard({ title, context, impact, suggestedFix, location })
   card.appendChild(header);
   card.appendChild(contentDiv);
   
-  
+  console.log('CREATE VIOLATION CARD - Created violation card element');
   return card;
 }
 
@@ -1543,52 +1543,52 @@ function resetToPhaseOne() {
 
 // Handle messages from the main plugin thread
 window.onmessage = (event) => {
-  
+  console.log('UI - Received window message event:', event);
   
   if (!event.data) {
-    
+    console.log('UI - No data in message event');
     return;
   }
   
   const message = event.data.pluginMessage;
   if (!message) {
-    
+    console.log('UI - No pluginMessage in event data');
     return;
   }
   
-  
+  console.log('UI - Processing plugin message:', message);
   
   switch (message.type) {
     case 'selection-changed':
-      
-      
+      console.log('UI - SELECTION-CHANGED MESSAGE RECEIVED');
+      console.log('UI - Message frames:', message.frames);
       currentState.selectedFrames = message.frames || [];
-      
+      console.log('UI - Updated currentState.selectedFrames:', currentState.selectedFrames);
       updateFrameSelection();
       updateCTAButton();
       updateCritiqueAgainButton();
       break;
       
     case 'analysis-started':
-      
+      console.log('UI - ANALYSIS-STARTED MESSAGE RECEIVED');
       // Continue with loading state
       break;
       
     case 'analysis-complete':
-      
-      
-      
+      console.log('UI - ANALYSIS-COMPLETE MESSAGE RECEIVED');
+      console.log('UI - Raw message:', message);
+      console.log('UI - Message result:', message.result);
       showResults(message.result);
       break;
       
     case 'analysis-error':
-      
-      
+      console.log('UI - ANALYSIS-ERROR MESSAGE RECEIVED');
+      console.log('UI - Error:', message.error);
       showError(message.error);
       break;
       
     default:
-      
+      console.log('UI - Unknown message type:', message.type);
   }
 };
 

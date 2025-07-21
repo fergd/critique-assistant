@@ -1,6 +1,6 @@
 figma.showUI(__html__, { width: 580, height: 800 });
 
-
+console.log('MAIN CODE - Plugin started, UI shown');
 
 function serializeNode(node, depth) {
   if (depth === undefined) depth = 0;
@@ -46,7 +46,7 @@ function serializeNode(node, depth) {
   
   // Add children recursively - use "in" operator like original app
   if ("children" in node && node.children && node.children.length > 0) {
-    
+    console.log('MAIN CODE - Serializing ' + node.children.length + ' children for node "' + node.name + '"');
     serialized.children = [];
     for (var i = 0; i < node.children.length; i++) {
       var child = node.children[i];
@@ -54,16 +54,16 @@ function serializeNode(node, depth) {
       if (serializedChild) {
         serialized.children.push(serializedChild);
       } else {
-        
+        console.log('MAIN CODE - Child "' + child.name + '" was filtered out (depth: ' + (depth + 1) + ')');
       }
     }
-    
+    console.log('MAIN CODE - Final children count for "' + node.name + '": ' + serialized.children.length);
   } else {
     serialized.children = [];
     if ("children" in node) {
-      
+      console.log('MAIN CODE - Node "' + node.name + '" has empty or no children array');
     } else {
-      
+      console.log('MAIN CODE - Node "' + node.name + '" has NO children property at all');
     }
   }
   
@@ -76,57 +76,57 @@ var selectedFrames = [];
 
 // Listen for selection changes
 figma.on('selectionchange', function() {
-  
-  
+  console.log('MAIN CODE - FIGMA SELECTION CHANGED EVENT FIRED');
+  console.log('MAIN CODE - Raw figma.selection:', figma.selection);
   
   // Handle the case where figma.selection is undefined
   if (figma.selection === undefined || figma.selection === null) {
-    
+    console.log('MAIN CODE - figma.selection is undefined/null, using currentPage.selection');
     currentSelection = figma.currentPage.selection || [];
   } else {
     currentSelection = figma.selection;
   }
   
-  
+  console.log('MAIN CODE - currentSelection after assignment:', currentSelection);
   updateFrameSelection();
 });
 
 // Update frame selection and notify UI
 function updateFrameSelection() {
-  
+  console.log('MAIN CODE - updateFrameSelection() called');
   
   // Ensure currentSelection is an array
   if (!currentSelection || !Array.isArray(currentSelection)) {
-    
+    console.log('MAIN CODE - currentSelection was invalid, setting to empty array');
     currentSelection = [];
   }
   
-  
-  
-  
+  console.log('MAIN CODE - Filtering selection for valid types...');
+  console.log('MAIN CODE - Raw currentSelection length:', currentSelection.length);
+  console.log('MAIN CODE - Raw currentSelection types:', currentSelection.map(function(n) { return n ? n.type : 'null'; }));
   
   selectedFrames = currentSelection.filter(function(node) {
     if (!node) {
-      
+      console.log('MAIN CODE - Found null/undefined node, skipping');
       return false;
     }
     var isValidType = ['FRAME', 'GROUP', 'SECTION'].includes(node.type);
-    
+    console.log('MAIN CODE - Node "' + node.name + '" (' + node.type + '): ' + (isValidType ? 'VALID' : 'INVALID'));
     
     // Additional debug info for each valid node
     if (isValidType) {
-      
-      
-      
+      console.log('MAIN CODE - Valid node "' + node.name + '" has children property (hasOwnProperty):', node.hasOwnProperty("children"));
+      console.log('MAIN CODE - Valid node "' + node.name + '" has children property ("in" operator):', "children" in node);
+      console.log('MAIN CODE - Valid node "' + node.name + '" children value:', node.children);
       if ("children" in node) {
-        
+        console.log('MAIN CODE - Valid node "' + node.name + '" children count:', node.children ? node.children.length : 'null');
       }
     }
     
     return isValidType;
   });
   
-  
+  console.log('MAIN CODE - Found ' + selectedFrames.length + ' valid frames/groups/sections');
   
   var message = {
     type: 'selection-changed',
@@ -141,27 +141,27 @@ function updateFrameSelection() {
     })
   };
   
-  
+  console.log('MAIN CODE - Sending message to UI:', message);
   
   // Send selection update to UI immediately
   figma.ui.postMessage(message);
   
-  
+  console.log('MAIN CODE - Message sent to UI');
 }
 
 figma.ui.onmessage = async function(msg) {
-  
+  console.log('MAIN CODE - Received message from UI:', msg);
   try {
     switch (msg.type) {
       case 'get-initial-state':
-        
+        console.log('MAIN CODE - Handling get-initial-state request');
         // Send initial selection state
         updateFrameSelection();
-        
+        console.log('MAIN CODE - Sent initial state to UI');
         break;
       
       case 'focus-selected-frames':
-        
+        console.log('MAIN CODE - Handling focus-selected-frames request');
         // Focus on the currently selected frames
         if (selectedFrames.length > 0) {
           // Set selection to the frames and zoom to fit
@@ -169,21 +169,21 @@ figma.ui.onmessage = async function(msg) {
           figma.viewport.scrollAndZoomIntoView(selectedFrames);
           
           figma.notify('Focused on ' + selectedFrames.length + ' selected frame(s)');
-          
+          console.log('MAIN CODE - Focused on ' + selectedFrames.length + ' frames');
         } else {
           figma.notify('No frames currently selected to focus on');
-          
+          console.log('MAIN CODE - No frames to focus on');
         }
         break;
       
       case 'analyze-frames':
-        
-        
-        
-        
+        console.log('MAIN CODE - Starting frame analysis');
+        console.log('MAIN CODE - Selected frames count:', selectedFrames.length);
+        console.log('MAIN CODE - Context:', msg.context);
+        console.log('MAIN CODE - Ignore repeated text:', msg.ignoreRepeatedText);
         
         if (selectedFrames.length === 0) {
-          
+          console.log('MAIN CODE - No frames selected, showing error');
           figma.notify("Please select one or more frames, groups, or sections to analyze.");
           figma.ui.postMessage({ 
             type: 'analysis-error', 
@@ -193,43 +193,43 @@ figma.ui.onmessage = async function(msg) {
         }
 
         // Show loading state
-        
+        console.log('MAIN CODE - Sending analysis-started message to UI');
         figma.ui.postMessage({ type: 'analysis-started' });
 
         try {
-          
-          
+          console.log('MAIN CODE - Serializing frames...');
+          console.log('MAIN CODE - Starting serialization for ' + selectedFrames.length + ' selected frames');
           
           // Log frame details before serialization
           for (var i = 0; i < selectedFrames.length; i++) {
             var frame = selectedFrames[i];
-            
-            
-            
-            
-            
+            console.log('MAIN CODE - Frame[' + i + ']: "' + frame.name + '" (type: ' + frame.type + ')');
+            console.log('MAIN CODE - Frame[' + i + '] has children property (hasOwnProperty):', frame.hasOwnProperty("children"));
+            console.log('MAIN CODE - Frame[' + i + '] has children property ("in" operator):', "children" in frame);
+            console.log('MAIN CODE - Frame[' + i + '] children direct access:', frame.children);
+            console.log('MAIN CODE - Frame[' + i + '] children length:', frame.children ? frame.children.length : 'no children property');
             
             // Try to access children differently
             try {
               if (frame.children && frame.children.length > 0) {
-                
-                
+                console.log('MAIN CODE - Frame[' + i + '] first child name:', frame.children[0].name);
+                console.log('MAIN CODE - Frame[' + i + '] first child type:', frame.children[0].type);
               }
             } catch (childError) {
-              
+              console.log('MAIN CODE - Error accessing children:', childError);
             }
             
             // Log other frame properties to understand structure
-            
-            
-            
-            
+            console.log('MAIN CODE - Frame[' + i + '] properties:', Object.keys(frame));
+            console.log('MAIN CODE - Frame[' + i + '] width:', frame.width);
+            console.log('MAIN CODE - Frame[' + i + '] height:', frame.height);
+            console.log('MAIN CODE - Frame[' + i + '] visible:', frame.visible);
           }
           
           // Serialize the selected frames using enhanced serialization
           var payload = selectedFrames.map(function(el) { return serializeNode(el); }).filter(function(item) { return Boolean(item); });
-          
-          
+          console.log('MAIN CODE - Serialized payload length:', payload.length);
+          console.log('MAIN CODE - Serialized payload (detailed):', JSON.stringify(payload, null, 2));
           
           // Count total nodes and text nodes for validation
           var totalNodes = 0;
@@ -244,19 +244,19 @@ figma.ui.onmessage = async function(msg) {
             }
           }
           payload.forEach(countNodes);
-          
-          
+          console.log('MAIN CODE - Total nodes in payload:', totalNodes);
+          console.log('MAIN CODE - Text nodes in payload:', textNodes);
 
           // Send to the proxy service
           var proxyUrl = 'https://critique-assistant-proxy-g5dvt2noj-christans-projects-b1d924ef.vercel.app/api/proxy';
-          
+          console.log('MAIN CODE - Sending to proxy URL:', proxyUrl);
           
           var requestBody = {
             design: payload,
             context: msg.context || '',
             ignoreRepeated: msg.ignoreRepeatedText || false
           };
-          
+          console.log('MAIN CODE - Request body:', requestBody);
           
           var response = await fetch(proxyUrl, {
             method: 'POST',
@@ -266,38 +266,38 @@ figma.ui.onmessage = async function(msg) {
             body: JSON.stringify(requestBody)
           });
 
-          
-          
+          console.log('MAIN CODE - Proxy response status:', response.status);
+          console.log('MAIN CODE - Proxy response ok:', response.ok);
 
           if (!response.ok) {
             throw new Error('Proxy request failed: ' + response.status + ' ' + response.statusText);
           }
 
           var result = await response.json();
-          
-          
-          
+          console.log('MAIN CODE - Proxy response data:', result);
+          console.log('MAIN CODE - Proxy response content type:', typeof result.content);
+          console.log('MAIN CODE - Proxy response content:', result.content);
 
-          
+          console.log('MAIN CODE - Processing result from assistant...');
           // Process the result from the assistant
           var analysisResult;
           
           if (result.error) {
-            
+            console.log('MAIN CODE - Result contains error:', result.error);
             throw new Error(result.error);
           }
           
-          
-          
+          console.log('MAIN CODE - Result type:', typeof result);
+          console.log('MAIN CODE - Result structure check...');
           
           // The proxy returns { content: "..." } where content is the assistant's response
           var assistantContent = result.content || result;
-          
-          
+          console.log('MAIN CODE - Assistant content:', assistantContent);
+          console.log('MAIN CODE - Assistant content type:', typeof assistantContent);
           
           // Check if content is empty or just "[]"
           if (!assistantContent || assistantContent === '[]' || assistantContent.trim() === '[]') {
-            
+            console.log('MAIN CODE - Assistant returned empty content, this indicates insufficient data was sent');
             analysisResult = {
               summary: "No issues detected - may need more detailed design content",
               strengths: [],
@@ -310,10 +310,10 @@ figma.ui.onmessage = async function(msg) {
           } else {
             // Try to parse the assistant's content as JSON first
             if (typeof assistantContent === 'string') {
-              
+              console.log('MAIN CODE - Attempting to parse assistant content as JSON');
               try {
                 var parsedContent = JSON.parse(assistantContent);
-                
+                console.log('MAIN CODE - Successfully parsed assistant content:', parsedContent);
                 
                 // Use the parsed content directly if it's an array (list of violations)
                 if (Array.isArray(parsedContent)) {
@@ -337,7 +337,7 @@ figma.ui.onmessage = async function(msg) {
                   };
                 }
               } catch (parseError) {
-                
+                console.log('MAIN CODE - JSON parse failed, treating as raw text:', parseError);
                 // If parsing fails, treat as raw text feedback
                 analysisResult = {
                   summary: "AI provided feedback in text format",
@@ -353,7 +353,7 @@ figma.ui.onmessage = async function(msg) {
                 };
               }
             } else {
-              
+              console.log('MAIN CODE - Assistant content is not string, using as object');
               analysisResult = {
                 summary: assistantContent.summary || "Analysis completed",
                 strengths: Array.isArray(assistantContent.strengths) ? assistantContent.strengths : [],
@@ -365,7 +365,7 @@ figma.ui.onmessage = async function(msg) {
             }
           }
           
-          
+          console.log('MAIN CODE - Final analysisResult:', analysisResult);
 
           figma.ui.postMessage({
             type: 'analysis-complete',
@@ -439,7 +439,7 @@ figma.ui.onmessage = async function(msg) {
 
       case 'focus-violation-area':
         // Enhanced focusing for specific violation areas
-        
+        console.log('MAIN CODE - Focus violation area request received:', msg.violationContext);
         var currentSelection = figma.currentPage.selection;
         
         if (currentSelection && currentSelection.length > 0) {
@@ -494,7 +494,7 @@ figma.ui.onmessage = async function(msg) {
           nodesFound = findRelevantNodes(targetFrame, msg.violationContext);
           
           if (nodesFound.length > 0) {
-            
+            console.log('MAIN CODE - Found', nodesFound.length, 'relevant nodes for violation');
             
             // Focus on the most specific nodes (prefer smaller, more targeted elements)
             var targetNodes = nodesFound.slice(0, 3); // Focus on first 3 relevant nodes
@@ -530,7 +530,7 @@ figma.ui.onmessage = async function(msg) {
             figma.notify(`Highlighting ${targetNodes.length} area(s) related to: ${msg.violationContext.title}`);
           } else {
             // Fallback to frame-level highlighting
-            
+            console.log('MAIN CODE - No specific nodes found, highlighting frame');
             figma.viewport.scrollAndZoomIntoView([targetFrame]);
             figma.notify(`Showing frame for: ${msg.violationContext.title}`);
           }
