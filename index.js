@@ -5,12 +5,22 @@ import fetch from 'node-fetch';
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Configure CORS properly for Figma
+// Configure CORS properly for Figma plugins
 app.use(cors({
-    origin: ['https://www.figma.com', 'https://figma.com'],
-    methods: ['POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type'],
-    credentials: false
+    origin: function(origin, callback) {
+        // Allow requests with no origin (like Figma plugins) or from allowed origins
+        if (!origin || origin === 'null' || 
+            origin === 'https://www.figma.com' || 
+            origin === 'https://figma.com') {
+            callback(null, true);
+        } else {
+            callback(null, true); // Allow all for now to debug
+        }
+    },
+    methods: ['POST', 'OPTIONS', 'GET'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: false,
+    optionsSuccessStatus: 200
 }));
 
 app.use(express.json({ limit: '10mb' }));
@@ -30,7 +40,8 @@ app.post('/api/proxy', async (req, res) => {
     try {
         console.log('Request received:', {
             timestamp: new Date().toISOString(),
-            bodySize: JSON.stringify(req.body).length
+            bodySize: JSON.stringify(req.body).length,
+            origin: req.headers.origin || 'null'
         });
 
         // Prepare request to OpenAI API
@@ -62,7 +73,8 @@ Focus Areas: ${req.body.contextAnalysis ? JSON.stringify(req.body.contextAnalysi
         });
 
         if (!openaiResponse.ok) {
-            throw new Error(`OpenAI API error: ${openaiResponse.status}`);
+            const errorText = await openaiResponse.text();
+            throw new Error(`OpenAI API error: ${openaiResponse.status} - ${errorText}`);
         }
 
         const result = await openaiResponse.json();
