@@ -53,7 +53,7 @@ app.post('/api/proxy', async (req, res) => {
             },
             body: JSON.stringify({
                 model: 'gpt-4-turbo',
-                max_tokens: 6000,
+                max_tokens: 4000,
                 temperature: 0.1,
                 messages: [
                     {
