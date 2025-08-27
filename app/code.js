@@ -124,7 +124,7 @@ function makeAnalysisRequest(payload, context, attempt) {
       reject(new Error('Analysis timeout - design may be too complex'));
     }, timeoutDuration);
     
-    fetch('https://critique-assistant-proxy-g5dvt2noj-christans-projects-b1d924ef.vercel.app/api/proxy', requestOptions)
+    fetch('https://critique-assistant-production.up.railway.app/api/proxy', requestOptions)
       .then(function(response) {
         clearTimeout(timeoutId);
         
