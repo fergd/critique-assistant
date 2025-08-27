@@ -52,8 +52,8 @@ app.post('/api/proxy', async (req, res) => {
                 'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
             },
             body: JSON.stringify({
-                model: 'gpt-4',
-                max_tokens: 4000,
+                model: 'gpt-4-turbo',
+                max_tokens: 6000,
                 temperature: 0.1,
                 messages: [
                     {
