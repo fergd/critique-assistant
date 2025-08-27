@@ -20,7 +20,8 @@ function serializeNodeForAI(node, depth) {
     type: node.type,
     visible: node.visible !== false, // Default to true if undefined
     width: (typeof node.width === 'number') ? Math.round(node.width) : 0,
-    height: (typeof node.height === 'number') ? Math.round(node.height) : 0
+    height: (typeof node.height === 'number') ? Math.round(node.height) : 0,
+    figmaId: node.id // Include the actual Figma node ID for direct targeting
   };
   
   // Only serialize what AI needs for analysis
@@ -217,21 +218,66 @@ function handleViolationFocus(violationContext) {
 
   return new Promise(function(resolve) {
     try {
-      var bestMatch = null;
-      var searchTerms = extractSimpleSearchTerms(violationContext);
+      console.log('Looking for location:', violationContext.location);
       
-      // Simple, fast search through selected frames
-      for (var i = 0; i < selectedFrames.length && !bestMatch; i++) {
-        bestMatch = findInFrame(selectedFrames[i], searchTerms, 0);
-      }
+      var targetNode = findNodeByLocationPath(violationContext.location);
       
-      if (bestMatch) {
-        figma.getNodeByIdAsync(bestMatch.id)
+      if (targetNode) {
+        figma.getNodeByIdAsync(targetNode.id)
           .then(function(node) {
             if (node) {
               figma.currentPage.selection = [node];
               figma.viewport.scrollAndZoomIntoView([node]);
-              figma.notify('Found: ' + (violationContext.title || 'element'));
+              figma.notify('Found: ' + node.name);
+              highlightNodeSimple(node);
+            } else {
+              fallbackToFrames();
+            }
+            resolve();
+          })
+          .catch(function(error) {
+            console.log('Error selecting node:', error);
+            fallbackToFrames();
+            resolve();
+          });
+      } else {
+        console.log('Could not find node for location path');
+        fallbackToFrames();
+        resolve();
+      }
+    } catch (error) {
+      console.log('Focus error:', error);
+      fallbackToFrames();
+      resolve();
+    }
+  });
+  
+  function fallbackToFrames() {
+    figma.currentPage.selection = selectedFrames;
+    figma.viewport.scrollAndZoomIntoView(selectedFrames);
+    figma.notify('Showing selected frames - could not locate specific element');
+  }
+}
+
+function handleViolationFocus(violationContext) {
+  if (!violationContext || selectedFrames.length === 0) {
+    figma.notify("Cannot focus on violation");
+    return Promise.resolve();
+  }
+
+  return new Promise(function(resolve) {
+    try {
+      console.log('Looking for violation:', violationContext);
+      
+      var targetNode = findBestMatchingNode(violationContext);
+      
+      if (targetNode) {
+        figma.getNodeByIdAsync(targetNode.id)
+          .then(function(node) {
+            if (node) {
+              figma.currentPage.selection = [node];
+              figma.viewport.scrollAndZoomIntoView([node]);
+              figma.notify('Highlighting: ' + (node.name || 'element'));
               highlightNodeSimple(node);
             } else {
               fallbackToFrames();
@@ -255,26 +301,175 @@ function handleViolationFocus(violationContext) {
   function fallbackToFrames() {
     figma.currentPage.selection = selectedFrames;
     figma.viewport.scrollAndZoomIntoView(selectedFrames);
-    figma.notify('Showing selected frames');
+    figma.notify('Could not locate specific element');
   }
+}
+
+function findBestMatchingNode(violationContext) {
+  var candidates = [];
+  
+  // Collect all possible keywords from the violation
+  var keywords = extractAllKeywords(violationContext);
+  console.log('Keywords extracted:', keywords);
+  
+  // Search through all nodes in selected frames
+  for (var f = 0; f < selectedFrames.length; f++) {
+    searchAllNodes(selectedFrames[f], keywords, candidates, 0);
+  }
+  
+  // Score and sort candidates
+  candidates.sort(function(a, b) {
+    return b.score - a.score;
+  });
+  
+  console.log('Top candidates:', candidates.slice(0, 3));
+  
+  return candidates.length > 0 ? candidates[0].node : null;
+}
+
+function extractAllKeywords(violation) {
+  var keywords = [];
+  var sources = [
+    violation.title,
+    violation.description,
+    violation.location,
+    violation.recommendation
+  ];
+  
+  for (var i = 0; i < sources.length; i++) {
+    var source = sources[i];
+    if (source && typeof source === 'string') {
+      // Extract quoted content (likely element names)
+      var quoted = source.match(/"([^"]+)"/g);
+      if (quoted) {
+        for (var j = 0; j < quoted.length; j++) {
+          keywords.push(quoted[j].replace(/"/g, '').toLowerCase());
+        }
+      }
+      
+      // Extract numbers (often important identifiers)
+      var numbers = source.match(/\b\d+\b/g);
+      if (numbers) {
+        for (var k = 0; k < numbers.length; k++) {
+          keywords.push(numbers[k]);
+        }
+      }
+      
+      // Extract UI element types
+      var uiTypes = source.match(/\b(button|input|field|card|menu|nav|form|link|icon|text|label|number|title|header|footer)\b/gi);
+      if (uiTypes) {
+        for (var l = 0; l < uiTypes.length; l++) {
+          keywords.push(uiTypes[l].toLowerCase());
+        }
+      }
+      
+      // Extract words from location path
+      if (source === violation.location) {
+        var pathWords = source.split(/[>\-\+\(\)\s]+/);
+        for (var m = 0; m < pathWords.length; m++) {
+          var word = pathWords[m].trim().toLowerCase();
+          if (word.length > 2) {
+            keywords.push(word);
+          }
+        }
+      }
+    }
+  }
+  
+  return keywords;
+}
+
+function searchAllNodes(node, keywords, candidates, depth) {
+  if (depth > 8 || !node) return;
+  
+  var score = calculateMatchScore(node, keywords);
+  if (score > 0) {
+    candidates.push({ node: node, score: score });
+  }
+  
+  if (node.children && Array.isArray(node.children)) {
+    for (var i = 0; i < node.children.length; i++) {
+      searchAllNodes(node.children[i], keywords, candidates, depth + 1);
+    }
+  }
+}
+
+function calculateMatchScore(node, keywords) {
+  var score = 0;
+  var nodeName = (node.name || '').toLowerCase();
+  var nodeText = '';
+  
+  // Get text content if it's a text node
+  if (node.type === 'TEXT' && node.characters) {
+    nodeText = node.characters.toLowerCase();
+  }
+  
+  for (var i = 0; i < keywords.length; i++) {
+    var keyword = keywords[i].toLowerCase();
+    
+    // Exact name match (highest score)
+    if (nodeName === keyword) {
+      score += 100;
+    }
+    // Name contains keyword
+    else if (nodeName.includes(keyword)) {
+      score += 50;
+    }
+    // Text content matches
+    else if (nodeText.includes(keyword)) {
+      score += 30;
+    }
+    // Partial match
+    else if (keyword.length > 3 && (nodeName.includes(keyword) || keyword.includes(nodeName))) {
+      score += 20;
+    }
+  }
+  
+  return score;
 }
 
 function extractSimpleSearchTerms(violation) {
   var terms = [];
   var sources = [violation.title, violation.description, violation.location];
   
+  // Priority 1: Extract from location path - this is most reliable
+  if (violation.location && typeof violation.location === 'string') {
+    // Split by common separators and extract meaningful parts
+    var locationParts = violation.location.split(/[>\-\+\(\)]/);
+    for (var i = 0; i < locationParts.length; i++) {
+      var part = locationParts[i].trim().toLowerCase();
+      if (part.length > 2 && !isStopWord(part)) {
+        terms.push(part);
+        // Also add parts of compound names
+        if (part.includes(' ')) {
+          var subParts = part.split(' ');
+          for (var j = 0; j < subParts.length; j++) {
+            var subPart = subParts[j].trim();
+            if (subPart.length > 2 && !isStopWord(subPart)) {
+              terms.push(subPart);
+            }
+          }
+        }
+      }
+    }
+  }
+  
   for (var i = 0; i < sources.length; i++) {
     var source = sources[i];
     if (source && typeof source === 'string') {
-      // Extract quoted terms and UI elements
+      // Extract quoted terms (likely element names or content)
       var quoted = source.match(/"([^"]{2,20})"/g);
       if (quoted) {
         for (var j = 0; j < quoted.length; j++) {
-          terms.push(quoted[j].replace(/"/g, '').toLowerCase());
+          var quotedTerm = quoted[j].replace(/"/g, '').toLowerCase();
+          if (!isStopWord(quotedTerm)) {
+            terms.push(quotedTerm);
+          }
         }
       }
       
-      var uiTerms = source.match(/\b(button|input|field|menu|nav|form|link|icon)\b/gi);
+      // Extract UI element types
+      var uiTerms = source.match(/\b(button|input|field|menu|nav|form|link|icon|card|number|text|label|header|title)\b/gi);
       if (uiTerms) {
         for (var k = 0; k < uiTerms.length; k++) {
           terms.push(uiTerms[k].toLowerCase());
@@ -283,7 +478,15 @@ function extractSimpleSearchTerms(violation) {
     }
   }
   
-  return terms.slice(0, 3); // Limit for performance
+  // Remove duplicates and return first 5 terms
+  var uniqueTerms = [];
+  for (var l = 0; l < terms.length && uniqueTerms.length < 5; l++) {
+    if (uniqueTerms.indexOf(terms[l]) === -1) {
+      uniqueTerms.push(terms[l]);
+    }
+  }
+  
+  return uniqueTerms;
 }
 
 function findInFrame(frame, searchTerms, depth) {
@@ -315,17 +518,44 @@ function highlightNodeSimple(node) {
   try {
     if (node.hasOwnProperty("strokes")) {
       var originalStrokes = node.strokes;
-      node.strokes = [{ type: "SOLID", color: { r: 1, g: 0.2, b: 0.2 } }];
-      node.strokeWeight = 3;
+      var originalStrokeWeight = node.strokeWeight;
       
+      // Create a very obvious highlight
+      node.strokes = [{ 
+        type: "SOLID", 
+        color: { r: 1, g: 0, b: 0 } 
+      }];
+      node.strokeWeight = 8; // Much thicker
+      node.dashPattern = [15, 8]; // Animated dashing effect
+      
+      // Flash effect - change stroke weight to create pulsing
+      var flashCount = 0;
+      var flashInterval = setInterval(function() {
+        try {
+          if (flashCount < 6 && node.strokeWeight) {
+            node.strokeWeight = flashCount % 2 === 0 ? 12 : 8;
+            flashCount++;
+          } else {
+            clearInterval(flashInterval);
+          }
+        } catch (e) {
+          clearInterval(flashInterval);
+        }
+      }, 300);
+      
+      // Remove highlight after 6 seconds
       setTimeout(function() {
         try {
+          clearInterval(flashInterval);
           node.strokes = originalStrokes;
-          node.strokeWeight = 0;
+          node.strokeWeight = originalStrokeWeight;
+          node.dashPattern = []; // Remove dashing
         } catch (e) {}
-      }, 2000);
+      }, 6000);
     }
-  } catch (error) {}
+  } catch (error) {
+    console.error('Highlight error:', error);
+  }
 }
 
 // PRODUCTION: Main message handler with comprehensive error handling
