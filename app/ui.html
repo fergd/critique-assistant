@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Critique Assistant</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,600;0,800;1,400;1,600;1,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+    :root {
+        --midnight: #1a0f3d;
+        --midnight-light: #8d879e;
+        --twilight: #3b2471;
+        --twilight-light: #9d92b8;
+        --amethyst: #7E3DD4;
+        --amethyst-light: #bf9eea;
+        --orchid: #b845c7;
+        --orchid-light: #dca2e3;
+        --fuchsia: #e24ba6;
+        --fuchsia-light: #f1a5d3;
+        --sunset: #ff5d7a;
+        --sunset-light: #ffaebd;
+        --tangerine: #ff7c4f;
+        --tangerine-light: #ffbea7;
+        --amber: #ffa600;
+        --amber-light: #ffd380;
+        --snow: #ffffff;
+        --mint: #C1EA9E;
+        --dark-mint: #65CF47;
+
+        --base-font-size: 15px;
+        --font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+
+        --ms3: 3.375rem;
+        --ms2: 2.25rem;
+        --ms1: 1.5rem;
+        --ms0: 1rem;
+        --ms-1: 0.667rem;
+
+        --font-size-heading: var(--ms1);
+        --font-size-body: var(--ms0);
+        --font-size-small: var(--ms-1);
+        --font-heavy: 800;
+        --font-normal: 600;
+
+        --padding-large: var(--ms2);
+        --padding-medium: var(--ms1);
+        --padding-small: var(--ms0);
+        --padding-tiny: var(--ms-1);
+        --spacing-large: var(--ms3);
+        --spacing-medium: var(--ms0);
+        --spacing-small: var(--ms-1);
+
+        --button-shadow-offset: -4px 4px 0;
+        --button-shadow-bolder: -7px 7px 0;
+
+        --default-weight: 4px;
+        --default-radius: 11px;
+        --default-border: var(--default-weight) solid var(--midnight);
+        --border-subdued: var(--default-weight) solid var(--midnight-light);
+        --shadow-bold: var(--button-shadow-offset) var(--midnight);
+        --shadow-subdued: var(--button-shadow-offset) var(--midnight-light);
+        --shadow-bold: var(--button-shadow-bolder) var(--midnight);
+
+        --app-bg: var(--snow);
+        --text-primary: var(--twilight);
+        --text-secondary: var(--midnight-light);
+    }
+
+    *, *::before, *::after {
+        box-sizing: border-box;
+    }
+
+    html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        font-size: 100%;
+        font: inherit;
+        vertical-align: baseline;
+    }
+
+    article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
+        display: block;
+    }
+
+    body {
+        line-height: 1;
+    }
+
+    blockquote, q {
+        quotes: none;
+    }
+
+    blockquote:before, blockquote:after, q:before, q:after {
+        content: '';
+        content: none;
+    }
+
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+
+    ul {
+        list-style: none;
+    }
+
+    html {
+        font-size: var(--base-font-size);
+        background: var(--midnight);
+    }
+
+    body {
+        font-size: 100%;
+        font-family: var(--font-family);
+        font-weight: var(--font-heavy);
+        margin: 0 auto;
+        min-height: 100vh;
+        width: 580px;
+        background: var(--app-bg);
+        color: var(--text-primary);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        overflow-x: hidden;
+    }
+
+    small {
+        font-size: var(--ms-1);
+        color: var(--text-secondary);
+    }
+
+    header {
+        margin-bottom: var(--padding-large);
+    }
+
+    h1 {
+        font-size: var(--ms2);
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    i.heading-icon {
+        color: var(--sunset);
+        font-size: var(--ms1);
+    }
+
+    h2 {
+        font-size: var(--ms1);
+        margin-bottom: var(--padding-small);
+    }
+    
+    p {
+        margin-bottom: var(--padding-tiny);
+        line-height: 1.2;
+    }
+    
+    p.subtitle {
+        color: var(--text-secondary);
+    }
+
+    .basic-button {
+        text-decoration: none;
+        cursor: pointer;
+        font-family: var(--font-family);
+        font-size: var(--font-size-body);
+        font-weight: 800;
+        padding: var(--padding-small);
+        background: var(--snow);
+        color: var(--text-primary);
+        box-shadow: var(--shadow-bold);
+        border: var(--default-border);
+        border-radius: var(--default-radius);
+        transition: all 0.15s ease;
+        white-space: nowrap;
+        will-change: transform, background-color;
+    }
+
+    button.basic-button:hover {
+        background: var(--amber);
+        transform: translateY(-1px);
+    }
+
+    button.basic-button:active {
+        box-shadow: none;
+        transform: translateY(0);
+    }
+
+    button.basic-button.disabled {
+        background: var(--amber-light);
+        cursor: not-allowed;
+        color: var(--midnight-light);
+        border: var(--border-subdued);
+        box-shadow: var(--shadow-bold);
+    }
+
+    .app-container {
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: var(--padding-large);
+        overflow: auto;
+        contain: layout style;
+    }
+
+    .footer {
+        padding: var(--padding-medium) 0;
+        border-top: 2px dashed var(--twilight-light);
+        display: flex;
+        flex-direction: row;
+        gap: var(--spacing-medium);
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .footer p {
+        color: var(--text-secondary);
+        font-weight: var(--font-heavy);
+    }
+
+    .feedback-button {
+        flex-grow: 2;
+    }
+
+    .item {
+        border: var(--default-weight) solid var(--midnight-light);
+        border-radius: var(--default-radius);
+        padding: var(--padding-medium);
+    }
+
+    .item .step-label {
+        font-size: var(--ms1);
+    }
+
+    .form-container {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-medium);
+    }
+
+    .frame-select {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .frame-select i.step-icon {
+        font-size: var(--font-size-heading);
+        color: var(--amethyst);
+    }
+
+    .frame-select-invalid i.step-icon {
+        display: none;
+    }
+
+    .frame-select-valid i.step-icon {
+        display: block;
+    }
+
+    .add-context {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-medium);
+    }
+
+    .add-context div:nth-of-type(even) {
+        border-radius: var(--default-radius);
+        padding: var(--padding-medium) 0 0 0;
+    }
+
+    textarea.context-input {
+        font-weight: 600;
+        width: 100%;
+        min-height: 60px;
+        border: none;
+        outline: none;
+        background: transparent;
+        font-family: var(--font-family);
+        font-size: var(--font-size-body);
+        color: var(--text-primary);
+        resize: none;
+    }
+
+    textarea::placeholder {
+        color: var(--text-secondary);
+    }
+
+    .toggle-section {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .toggle-button {
+        border: var(--default-border);
+        border-color: var(--twilight-light);
+        border-radius: var(--default-radius);
+        cursor: pointer;
+        transition: all 0.15s ease;
+        padding: 7px 33px 7px 7px;
+        will-change: transform, background-color;
+    }
+
+    .toggle-button.checked {
+        padding: 7px 7px 7px 33px;
+        background: var(--amber);
+        border-color: var(--midnight);
+    }
+
+    .toggle-icon::before {
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        font-size: var(--ms1);
+        content: '\f111';
+    }
+
+    .toggle-button.checked .toggle-icon::before {
+        content: '\f058';
+    }
+
+    .cta-container {
+        text-align: center;
+        padding-top: var(--padding-medium);
+    }
+
+    .cta-button {
+        margin: 0 auto;
+        font-family: var(--font-family);
+        font-size: var(--font-size-heading);
+        font-weight: var(--font-heavy);
+        padding: var(--padding-medium);
+        box-shadow: var(--shadow-bold);
+        border-radius: var(--default-radius);
+        cursor: not-allowed;
+        transition: all 0.15s ease;
+        will-change: transform, background-color;
+    }
+
+    .cta-button.disabled {
+        background: var(--amber-light);
+        color: var(--midnight-light);
+        border: var(--border-subdued);
+    }
+
+    .cta-button.disabled i {
+        color: var(--sunset-light);
+    }
+
+    .cta-button.enabled {
+        background: var(--amber);
+        color: var(--midnight);
+        border: var(--default-border);
+        box-shadow: var(--shadow-bold);
+        cursor: pointer;
+    }
+
+    .cta-button.enabled i {
+        color: var(--midnight);
+    }
+
+    .cta-button.enabled:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--button-shadow-bolder) var(--midnight);
+    }
+
+    .cta-button.enabled:active {
+        box-shadow: none;
+        transform: translateY(0);
+    }
+
+    .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: var(--padding-large);
+        text-align: center;
+    }
+
+    .spinner {
+        display: grid;
+        grid-template-columns: repeat(3, 30px);
+        grid-template-rows: repeat(3, 30px);
+        gap: 6px;
+        margin: var(--padding-large) 0 0 0;
+        contain: layout style;
+    }
+
+    .spinner-box {
+        width: 36px;
+        height: 36px;
+        background: var(--snow);
+        border: var(--default-border);
+        border-radius: 6px;
+        transition: background-color 0.2s ease;
+        will-change: background-color;
+    }
+
+    .spinner-box.active {
+        background: var(--sunset);
+    }
+
+    .status-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-medium);
+        margin-top: var(--spacing-large);
+    }
+
+    .status-item {
+        display: flex;
+        align-items: center;
+        flex-direction: row;
+        gap: var(--spacing-small);
+        contain: layout style;
+    }
+
+    .status-item::before {
+        content: '';
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        font-size: var(--ms1);
+        color: var(--midnight);
+        width: 20px;
+        flex-shrink: 0;
+    }
+
+    .status-item.complete .status-text {
+        color: var(--midnight);
+    }
+
+    .status-item.complete::before {
+        content: '\f058';
+    }
+
+    .status-item.in-progress .status-text {
+        color: var(--sunset);
+    }
+
+    .status-item.in-progress::before {
+        content: '\e2ca';
+        color: var(--sunset);
+    }
+
+    .status-item.waiting .status-text {
+        color: var(--twilight-light);
+    }
+
+    .status-item.waiting::before {
+        content: '\e2ca';
+        color: var(--twilight-light);
+        visibility: hidden;
+    }
+
+    .results-container {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-small);
+        margin-bottom: var(--padding-medium);
+    }
+    
+    .results-content {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-small);
+        contain: layout;
+    }
+
+    .violation-card {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        border: var(--border-subdued);
+        border-radius: var(--default-radius);
+        margin-bottom: var(--spacing-small);
+        will-change: transform;
+        contain: layout style;
+    }
+
+    .violation-card-header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: var(--padding-small);
+        background: var(--snow);
+        border-radius: var(--default-radius) var(--default-radius) 0 0;
+        margin: 0;
+    }
+
+    .violation-header-left {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-medium );
+        flex-grow: 1;
+        min-width: 0;
+    }
+
+    .violation-title {
+        font-size: var(--ms1);
+        color: var(--twilight);
+        margin: 0;
+        font-weight: var(--font-heavy);
+        word-wrap: break-word;
+    }
+
+    .violation-meta {
+        display: flex;
+        flex-direction: row;
+        gap: var(--spacing-small);
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .severity-badge {
+        font-size: var(--ms-1);
+        font-weight: var(--font-heavy);
+        padding: 3px 8px;
+        border-radius: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: 2px solid;
+        white-space: nowrap;
+    }
+
+    .severity-critical {
+        background: var(--sunset-light);
+        color: var(--sunset);
+        border-color: var(--sunset);
+    }
+
+    .severity-important {
+        background: var(--tangerine-light);
+        color: var(--tangerine);
+        border-color: var(--tangerine);
+    }
+
+    .severity-minor {
+        background: var(--amber-light);
+        color: var(--amber);
+        border-color: var(--amber);
+    }
+
+    .tenet-badge {
+        font-size: var(--ms-1);
+        font-weight: var(--font-normal);
+        color: var(--twilight);
+        background: var(--amethyst-light);
+        border: 2px solid var(--amethyst);
+        padding: 3px 8px;
+        border-radius: 6px;
+        white-space: nowrap;
+    }
+
+    .violation-header-right {
+        display: flex;
+        align-items: flex-start;
+        margin-left: var(--spacing-small);
+        flex-shrink: 0;
+    }
+
+    .focus-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: var(--ms1);
+        padding: 8px;
+        background: var(--snow);
+        border-radius: var(--default-radius);
+        border: var(--default-border);
+        box-shadow: var(--shadow-bold);
+        transition: all 0.1s ease;
+        color: var(--twilight);
+        will-change: transform, background-color, box-shadow;
+        contain: layout style;
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .focus-button:hover {
+        background: var(--amber-light);
+        transform: translateY(-1px);
+    }
+
+    .focus-button:active {
+        background: var(--amber);
+        box-shadow: none;
+        transform: translateY(0);
+    }
+
+    .focus-button.processing {
+        background: var(--orchid-light);
+        cursor: wait;
+        animation: pulse 0.8s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+
+    .violation-content {
+        padding: var(--padding-small);
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-small);
+    }
+
+    .violation-description {
+        font-size: var(--font-size-body);
+        color: var(--text-primary);
+        font-weight: 500;
+        line-height: 1.4;
+        margin: 0;
+    }
+
+    .violation-impact {
+        font-size: var(--font-size-body);
+        color: var(--text-primary);
+        font-weight: 500;
+        line-height: 1.3;
+        margin: 0;
+        padding: var(--padding-tiny);
+        background: var(--snow);
+        border-left: 3px solid var(--twilight-light);
+    }
+
+    .violation-context {
+        font-size: var(--font-size-body);
+        color: var(--text-primary);
+        margin-top: var(--spacing-small);
+        padding: var(--padding-tiny);
+        background: var(--snow);
+        border-left: 3px solid var(--twilight-light);
+    }
+
+    .violation-recommendation {
+        font-size: var(--ms0);
+        color: var(--midnight);
+        background: var(--mint);
+        padding: var(--padding-tiny);
+        border-radius: 4px;
+        margin-top: var(--spacing-small);
+        border-left: 3px solid var(--dark-mint);
+        line-height: 1.3;
+    }
+
+    .trap-reference {
+        font-size: var(--font-size-body);
+        color: var(--text-primary);
+        font-weight: var(--font-normal);
+        background: var(--snow);
+    }
+
+    .results-card {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        border: var(--border-subdued);
+        border-radius: var(--default-radius);
+    }
+
+    header.results-card-header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--padding-tiny) var(--padding-small);
+        color: var(--midnight);
+        border-radius: var(--default-radius) var(--default-radius) 0 0;
+        margin: 0;
+    }
+
+    .results-card.nothing-returned {
+        border-color: var(--dark-mint);
+    }
+
+    .nothing-returned header.results-card-header {
+        background: var(--mint);
+    }
+
+    .results-card.error {
+        border-color: var(--tangerine);
+    }
+
+    .results-card.error header.results-card-header {
+        background: var(--tangerine-light);
+    }
+
+    header.results-card-header h3 {
+        font-size: var(--ms1);
+        color: var(--twilight);
+        margin-bottom: var(--padding-tiny);
+    }
+
+    .results-card .content {
+        padding: var(--padding-small);
+        font-size: var(--font-size-body);
+        color: var(--text-primary);
+        font-weight: 500;
+        line-height: 1.3;
+    }
+
+    .crit-actions-container {
+        margin: var(--spacing-medium) 0;
+        display: flex;
+        flex-direction: row;
+        gap: var(--spacing-large);
+    }
+
+    .hidden {
+        display: none !important;
+    }
+
+    /* PERFORMANCE OPTIMIZATIONS */
+    .spinner-box, .focus-button, .cta-button, .toggle-button {
+        transform: translateZ(0);
+        backface-visibility: hidden;
+    }
+
+    .violation-card, .status-item {
+        contain: layout style;
+    }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <div>
+            <div id="phaseOne" class="form-container">
+                <header>
+                    <h1><i class="heading-icon fas fa-wand-magic-sparkles"></i>&nbsp;Critique assistant</h1>
+                </header>
+                <div class="item frame-select frame-select-invalid" id="selectFrame">
+                    <div>
+                        <p class="step-label">Select a frame</p>
+                        <small>Required</small>
+                    </div>
+                    <div>
+                        <i class="step-icon fas fa-check-circle"></i>
+                    </div>
+                </div>
+                <div class="item add-context" id="addContext">
+                    <div>
+                        <p class="step-label">Add context</p>
+                        <small>Optional</small>
+                    </div>
+                    <div>
+                        <textarea class="context-input" id="contextInput" placeholder="Tell the agent what to focus on..."></textarea>
+                    </div>
+                </div>
+                <div class="item toggle-section" id="toggleSection">
+                    <div>
+                        <p class="step-label">Ignore repeated text</p>
+                        <small>Optional</small>
+                    </div>
+                    <div class="toggle-button" id="toggleContainer">
+                        <i class="toggle-icon"></i>
+                    </div>
+                </div>
+                <div class="cta-container">
+                    <button class="cta-button disabled" id="ctaButton">
+                        <i class="fas fa-wand-magic-sparkles"></i>
+                        <span>Start critique</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div id="phaseTwo" class="loading-container hidden">
+                <header>
+                    <h2>Analyzing your design</h2>
+                    <p class="subtitle">This may take a while depending on the size of your selection.</p>
+                </header>
+                <div class="spinner" id="spinner">
+                    <div class="spinner-box"></div>
+                    <div class="spinner-box"></div>
+                    <div class="spinner-box"></div>
+                    <div class="spinner-box"></div>
+                    <div class="spinner-box"></div>
+                    <div class="spinner-box"></div>
+                    <div class="spinner-box"></div>
+                    <div class="spinner-box"></div>
+                    <div class="spinner-box"></div>
+                </div>
+                <div class="status-list">
+                    <div class="status-item waiting" id="status1">
+                        <div class="status-text">Extracting design elements</div>
+                    </div>
+                    <div class="status-item waiting" id="status2">
+                        <div class="status-text">Serializing design nodes</div>
+                    </div>
+                    <div class="status-item waiting" id="status3">
+                        <div class="status-text">Sending to AI assistant</div>
+                    </div>
+                    <div class="status-item waiting" id="status4">
+                        <div class="status-text">Processing critique response</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="phaseThree" class="results-container hidden">
+                <header>
+                    <h1><i class="heading-icon fas fa-wand-magic-sparkles"></i>&nbsp;Results</h1>
+                </header>
+                <div id="resultsContent" class="results-content"></div>
+                <div class="crit-actions-container">
+                    <button class="basic-button" id="startOverButton">
+                        <span>Start over</span>
+                    </button>
+                    <button class="basic-button" id="critiqueAgainButton">
+                        <span>Critique again</span>
+                    </button>
+                </div>
+                <footer id="globalFooter" class="footer">
+                    <p>The AI agent is still in training. Your substantive feedback will help make this tool better.</p>
+                    <a class="feedback-button basic-button" href="https://forms.gle/NDnGg7RVjf4biB6g8" target="_blank">Give feedback</a>
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    <script>
+// PERFORMANCE: Optimized state management
+const STATE = {
+  selectedFrames: [],
+  context: '',
+  ignoreRepeatedText: false,
+  analysisInProgress: false,
+  currentPhase: 'phaseOne'
+};
+
+// PERFORMANCE: Cached DOM elements
+const DOM = {
+  phaseOne: document.getElementById('phaseOne'),
+  phaseTwo: document.getElementById('phaseTwo'),
+  phaseThree: document.getElementById('phaseThree'),
+  selectFrame: document.getElementById('selectFrame'),
+  contextInput: document.getElementById('contextInput'),
+  toggleContainer: document.getElementById('toggleContainer'),
+  ctaButton: document.getElementById('ctaButton'),
+  spinner: document.getElementById('spinner'),
+  status1: document.getElementById('status1'),
+  status2: document.getElementById('status2'),
+  status3: document.getElementById('status3'),
+  status4: document.getElementById('status4'),
+  resultsContent: document.getElementById('resultsContent'),
+  startOverButton: document.getElementById('startOverButton'),
+  critiqueAgainButton: document.getElementById('critiqueAgainButton')
+};
+
+let loadingAnimation = null;
+let inputDebounce = null;
+
+// PERFORMANCE: Optimized initialization
+function initialize() {
+  setupEventListeners();
+  updateUI();
+  parent.postMessage({ pluginMessage: { type: 'get-initial-state' } }, '*');
+}
+
+function setupEventListeners() {
+  DOM.contextInput.addEventListener('input', handleContextInputDebounced, { passive: true });
+  DOM.toggleContainer.addEventListener('click', handleToggleClick);
+  DOM.ctaButton.addEventListener('click', handleCTAClick);
+  DOM.startOverButton.addEventListener('click', resetToPhaseOne);
+  DOM.critiqueAgainButton.addEventListener('click', handleCritiqueAgain);
+}
+
+// PERFORMANCE: Debounced input with auto-resize
+function handleContextInputDebounced(e) {
+  clearTimeout(inputDebounce);
+  inputDebounce = setTimeout(() => {
+    STATE.context = e.target.value;
+    
+    // Smooth height adjustment
+    requestAnimationFrame(() => {
+      e.target.style.height = 'auto';
+      e.target.style.height = Math.min(e.target.scrollHeight, 200) + 'px';
+    });
+  }, 150);
+}
+
+function handleToggleClick() {
+  STATE.ignoreRepeatedText = !STATE.ignoreRepeatedText;
+  updateToggleButton();
+}
+
+function handleCTAClick() {
+  if (!DOM.ctaButton.classList.contains('disabled')) {
+    startAnalysis();
+  }
+}
+
+function handleCritiqueAgain() {
+  if (STATE.selectedFrames.length > 0) {
+    startAnalysis();
+  }
+}
+
+// PERFORMANCE: Batched DOM updates
+function updateUI() {
+  requestAnimationFrame(() => {
+    updateFrameSelection();
+    updateToggleButton();
+    updateCTAButton();
+    updateCritiqueAgainButton();
+  });
+}
+
+function updateFrameSelection() {
+  const frameCount = STATE.selectedFrames.length;
+  const isValid = frameCount > 0;
+  
+  DOM.selectFrame.classList.toggle('frame-select-invalid', !isValid);
+  DOM.selectFrame.classList.toggle('frame-select-valid', isValid);
+}
+
+function updateToggleButton() {
+  DOM.toggleContainer.classList.toggle('checked', STATE.ignoreRepeatedText);
+}
+
+function updateCTAButton() {
+  const isEnabled = STATE.selectedFrames.length > 0 && !STATE.analysisInProgress;
+  
+  DOM.ctaButton.classList.toggle('disabled', !isEnabled);
+  DOM.ctaButton.classList.toggle('enabled', isEnabled);
+}
+
+function updateCritiqueAgainButton() {
+  const hasFrames = STATE.selectedFrames.length > 0;
+  DOM.critiqueAgainButton.classList.toggle('disabled', !hasFrames);
+}
+
+// PERFORMANCE: Efficient phase switching
+function switchToPhase(phase) {
+  STATE.currentPhase = phase;
+  
+  DOM.phaseOne.classList.add('hidden');
+  DOM.phaseTwo.classList.add('hidden');
+  DOM.phaseThree.classList.add('hidden');
+
+  switch (phase) {
+    case 'phaseOne':
+      DOM.phaseOne.classList.remove('hidden');
+      break;
+    case 'phaseTwo':
+      DOM.phaseTwo.classList.remove('hidden');
+      startLoadingAnimation();
+      break;
+    case 'phaseThree':
+      DOM.phaseThree.classList.remove('hidden');
+      stopLoadingAnimation();
+      break;
+  }
+}
+
+function startAnalysis() {
+  if (STATE.selectedFrames.length === 0) {
+    parent.postMessage({ 
+      pluginMessage: { 
+        type: 'show-notification',
+        message: 'Please select at least one frame to analyze.'
+      }
+    }, '*');
+    return;
+  }
+
+  STATE.analysisInProgress = true;
+  updateCTAButton();
+  switchToPhase('phaseTwo');
+  resetLoadingStatus();
+
+  parent.postMessage({ 
+    pluginMessage: { 
+      type: 'analyze-frames',
+      context: STATE.context,
+      ignoreRepeatedText: STATE.ignoreRepeatedText
+    }
+  }, '*');
+}
+
+// PERFORMANCE: Optimized spinner with fewer DOM operations
+function animateSpinner() {
+  const spinnerBoxes = DOM.spinner.querySelectorAll('.spinner-box');
+  let activeIndex = 0;
+
+  loadingAnimation = setInterval(() => {
+    spinnerBoxes[activeIndex]?.classList.remove('active');
+    activeIndex = (activeIndex + 1) % spinnerBoxes.length;
+    spinnerBoxes[activeIndex]?.classList.add('active');
+  }, 350);
+}
+
+function startLoadingAnimation() {
+  if (!loadingAnimation) {
+    animateSpinner();
+  }
+
+  // Optimized status progression
+  const statusProgression = [
+    { element: DOM.status1, delay: 200, duration: 400 },
+    { element: DOM.status2, delay: 800, duration: 600 },
+    { element: DOM.status3, delay: 1600, duration: 800 },
+    { element: DOM.status4, delay: 2600, duration: 0 }
+  ];
+
+  statusProgression.forEach(({ element, delay, duration }) => {
+    setTimeout(() => {
+      element.classList.remove('waiting');
+      element.classList.add('in-progress');
+      
+      if (duration > 0) {
+        setTimeout(() => {
+          element.classList.remove('in-progress');
+          element.classList.add('complete');
+        }, duration);
+      }
+    }, delay);
+  });
+}
+
+function stopLoadingAnimation() {
+  if (loadingAnimation) {
+    clearInterval(loadingAnimation);
+    loadingAnimation = null;
+  }
+  
+  DOM.spinner.querySelectorAll('.spinner-box').forEach(box => {
+    box.classList.remove('active');
+  });
+}
+
+function resetLoadingStatus() {
+  [DOM.status1, DOM.status2, DOM.status3, DOM.status4].forEach(item => {
+    item.className = 'status-item waiting';
+  });
+}
+
+function showResults(result) {
+  STATE.analysisInProgress = false;
+  DOM.status4.classList.remove('in-progress');
+  DOM.status4.classList.add('complete');
+
+  setTimeout(() => {
+    switchToPhase('phaseThree');
+    populateResults(result);
+    updateUI();
+  }, 600);
+}
+
+// PERFORMANCE: High-performance violation card creation
+function createViolationCard(violation) {
+  const card = document.createElement('div');
+  card.className = 'violation-card';
+
+  const header = document.createElement('div');
+  header.className = 'violation-card-header';
+
+  const headerLeft = document.createElement('div');
+  headerLeft.className = 'violation-header-left';
+
+  const titleElement = document.createElement('h3');
+  titleElement.className = 'violation-title';
+  titleElement.textContent = violation.title || 'Usability Issue';
+
+  const metaDiv = document.createElement('div');
+  metaDiv.className = 'violation-meta';
+
+  // Severity badge
+  if (violation.severity) {
+    const severityBadge = document.createElement('span');
+    severityBadge.className = `severity-badge severity-${violation.severity}`;
+    severityBadge.textContent = violation.severity.toUpperCase();
+    metaDiv.appendChild(severityBadge);
+  }
+
+  // Tenet badge from principle violation
+  const tenetName = extractTenetFromPrinciple(violation.principleViolation);
+  if (tenetName) {
+    const tenetBadge = document.createElement('span');
+    tenetBadge.className = 'tenet-badge';
+    tenetBadge.textContent = tenetName;
+    metaDiv.appendChild(tenetBadge);
+  }
+
+  headerLeft.appendChild(titleElement);
+  headerLeft.appendChild(metaDiv);
+
+  const headerRight = document.createElement('div');
+  headerRight.className = 'violation-header-right';
+
+  // PERFORMANCE: Optimized focus button
+  const focusButton = document.createElement('button');
+  focusButton.className = 'focus-button';
+  focusButton.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i>';
+  
+  // Enhanced context storage for better matching
+  focusButton._violationData = {
+    title: violation.title,
+    description: violation.description,
+    location: violation.location,
+    userImpact: violation.userImpact,
+    recommendation: violation.recommendation,
+    searchTerms: extractSearchTerms(violation)
+  };
+  
+  focusButton.addEventListener('click', handleFocusButtonClick);
+
+  headerRight.appendChild(focusButton);
+  header.appendChild(headerLeft);
+  header.appendChild(headerRight);
+
+  const content = document.createElement('div');
+  content.className = 'violation-content';
+
+  // Main description
+  if (violation.description) {
+    const descP = document.createElement('p');
+    descP.className = 'violation-description';
+    descP.textContent = violation.description;
+    content.appendChild(descP);
+  }
+
+  // User impact
+  if (violation.userImpact) {
+    const impactP = document.createElement('p');
+    impactP.className = 'violation-impact';
+    impactP.textContent = `Impact: ${violation.userImpact}`;
+    content.appendChild(impactP);
+  }
+
+  // Context alignment
+  if (violation.contextAlignment) {
+    const contextP = document.createElement('p');
+    contextP.className = 'violation-context';
+    contextP.textContent = `Context: ${violation.contextAlignment}`;
+    content.appendChild(contextP);
+  }
+
+  // Recommendation
+  if (violation.recommendation) {
+    const recP = document.createElement('p');
+    recP.className = 'violation-recommendation';
+    recP.textContent = `Recommendation: ${violation.recommendation}`;
+    content.appendChild(recP);
+  }
+
+  // Principle violation
+  if (violation.principleViolation) {
+    const trapRef = document.createElement('div');
+    trapRef.className = 'trap-reference';
+    trapRef.textContent = violation.principleViolation;
+    content.appendChild(trapRef);
+  }
+
+  card.appendChild(header);
+  card.appendChild(content);
+  return card;
+}
+
+// PERFORMANCE: Ultra-fast focus handler
+function handleFocusButtonClick(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  
+  const button = e.currentTarget;
+  const violationData = button._violationData;
+  
+  if (!violationData) {
+    parent.postMessage({ 
+      pluginMessage: { 
+        type: 'show-notification',
+        message: 'No focus data available'
+      }
+    }, '*');
+    return;
+  }
+
+  // Immediate visual feedback
+  button.classList.add('processing');
+  
+  // Fast async message
+  parent.postMessage({ 
+    pluginMessage: {
+      type: 'focus-violation-area-optimized',
+      violationContext: violationData
+    }
+  }, '*');
+  
+  // Reset button state
+  setTimeout(() => {
+    button.classList.remove('processing');
+  }, 1500);
+}
+
+// Helper: Extract search terms from violation
+function extractSearchTerms(violation) {
+  const terms = new Set();
+  
+  // Priority 1: Extract from location path
+  if (violation.location) {
+    violation.location.split(' > ').forEach(part => {
+      const clean = part.trim().toLowerCase();
+      if (clean.length > 2 && !isStopWord(clean)) {
+        terms.add(clean);
+      }
+    });
+  }
+  
+  // Priority 2: Extract UI elements from title and description
+  [violation.title, violation.description].forEach(text => {
+    if (text) {
+      // UI element patterns
+      const uiPattern = /\b(button|input|field|menu|nav|form|card|modal|dropdown|checkbox|radio|tab|link|icon|frame|group|section|header|footer|sidebar)\b/gi;
+      const matches = text.match(uiPattern);
+      if (matches) {
+        matches.forEach(match => terms.add(match.toLowerCase()));
+      }
+      
+      // Quoted content (likely element names)
+      const quotedPattern = /"([^"]{2,25})"/g;
+      let match;
+      while ((match = quotedPattern.exec(text)) !== null) {
+        terms.add(match[1].toLowerCase());
+      }
+    }
+  });
+  
+  return Array.from(terms).slice(0, 5);
+}
+
+function isStopWord(word) {
+  return ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'].includes(word);
+}
+
+// Helper: Extract tenet name from principle violation text
+function extractTenetFromPrinciple(principleText) {
+  if (!principleText) return null;
+  
+  const tenets = ['Understandable', 'Habituating', 'Comfortable', 'Responsive', 'Efficient', 'Forgiving', 'Discreet', 'Protective', 'Beautiful'];
+  
+  for (const tenet of tenets) {
+    if (principleText.includes(tenet)) {
+      return tenet;
+    }
+  }
+  
+  return null;
+}
+
+// PERFORMANCE: Optimized results population
+function populateResults(result) {
+  try {
+    // Use DocumentFragment for batch DOM operations
+    const fragment = document.createDocumentFragment();
+
+    if (result.error) {
+      const errorCard = createResultCard({
+        title: 'Analysis Error',
+        content: result.error,
+        type: 'error'
+      });
+      fragment.appendChild(errorCard);
+      DOM.resultsContent.replaceChildren(fragment);
+      return;
+    }
+
+    let violations = [];
+
+    // Parse violations from new JSON structure
+    if (result.rawFeedback) {
+      try {
+        const parsed = typeof result.rawFeedback === 'string' 
+          ? JSON.parse(result.rawFeedback)
+          : result.rawFeedback;
+        violations = Array.isArray(parsed) ? parsed : [];
+      } catch (e) {
+        // Fallback to improvements field
+        violations = result.improvements || [];
+      }
+    } else if (result.improvements && Array.isArray(result.improvements)) {
+      violations = result.improvements;
+    }
+
+    if (violations.length > 0) {
+      // Process violations efficiently
+      violations.forEach(violation => {
+        const card = createViolationCard(violation);
+        fragment.appendChild(card);
+      });
+    } else {
+      const successCard = createResultCard({
+        title: 'Great work!',
+        content: 'No significant usability issues found in your design.',
+        type: 'nothing-returned'
+      });
+      fragment.appendChild(successCard);
+    }
+
+    // Single DOM operation
+    DOM.resultsContent.replaceChildren(fragment);
+  } catch (error) {
+    console.error('Results population error:', error);
+    const errorCard = createResultCard({
+      title: 'Display Error', 
+      content: 'Failed to display results properly.',
+      type: 'error'
+    });
+    DOM.resultsContent.appendChild(errorCard);
+  }
+}
+
+function createResultCard({ title, content, type = 'normal' }) {
+  const card = document.createElement('div');
+  card.className = `results-card ${type}`;
+
+  const header = document.createElement('header');
+  header.className = 'results-card-header';
+
+  const h3 = document.createElement('h3');
+  h3.textContent = title;
+  header.appendChild(h3);
+
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'content';
+  const p = document.createElement('p');
+  p.textContent = content;
+  contentDiv.appendChild(p);
+  
+  card.appendChild(header);
+  card.appendChild(contentDiv);
+  return card;
+}
+
+function showError(error) {
+  STATE.analysisInProgress = false;
+  updateUI();
+
+  if (STATE.currentPhase === 'phaseOne') {
+    parent.postMessage({ 
+      pluginMessage: { 
+        type: 'show-notification',
+        message: error
+      }
+    }, '*');
+    return;
+  }
+
+  switchToPhase('phaseThree');
+  showResults({ error: error });
+}
+
+function resetToPhaseOne() {
+  STATE.analysisInProgress = false;
+  STATE.context = '';
+  STATE.ignoreRepeatedText = false;
+
+  DOM.contextInput.value = '';
+  DOM.contextInput.style.height = 'auto';
+  updateUI();
+  switchToPhase('phaseOne');
+}
+
+// PERFORMANCE: Optimized message handling
+window.onmessage = (event) => {
+  if (!event.data?.pluginMessage) return;
+
+  const message = event.data.pluginMessage;
+
+  switch (message.type) {
+    case 'selection-changed':
+      requestAnimationFrame(() => {
+        STATE.selectedFrames = message.frames || [];
+        updateFrameSelection();
+        updateCTAButton();
+        updateCritiqueAgainButton();
+      });
+      break;
+    case 'analysis-started':
+      // No action needed
+      break;
+    case 'analysis-complete':
+      showResults(message.result);
+      break;
+    case 'analysis-error':
+      showError(message.error);
+      break;
+  }
+};
+
+// Global error handling
+window.onerror = (msg, url, line, col, error) => {
+  console.error('UI Error:', { msg, line, col });
+  showError('A user interface error occurred. Please try restarting the plugin.');
+};
+
+// Initialize
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initialize);
+} else {
+  initialize();
+}
+    </script>
+</body>
+</html>
