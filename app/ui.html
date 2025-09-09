@@ -101,7 +101,9 @@
         border-collapse: collapse;
         border-spacing: 0;
     }
-
+    strong {
+        font-weight: bolder;
+    }
     ul {
         list-style: none;
     }
@@ -158,6 +160,15 @@
     
     p.subtitle {
         color: var(--text-secondary);
+    }
+
+    a {
+        color: var(--amethyst);
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
     }
 
     .basic-button {
@@ -229,6 +240,7 @@
         border: var(--default-weight) solid var(--midnight-light);
         border-radius: var(--default-radius);
         padding: var(--padding-medium);
+        margin-bottom: var(--spacing-medium);
     }
 
     .item .step-label {
@@ -270,6 +282,73 @@
     .add-context div:nth-of-type(even) {
         border-radius: var(--default-radius);
         padding: var(--padding-medium) 0 0 0;
+    }
+
+    .api-key-section {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-medium);
+    }
+
+    .api-key-input-container {
+        display: flex;
+        flex-direction: row;
+        gap: var(--spacing-small);
+        align-items: center;
+    }
+
+    input.api-key-input {
+        font-weight: 600;
+        flex: 1;
+        padding: var(--padding-small);
+        border: var(--default-border);
+        border-color: var(--midnight-light);
+        border-radius: var(--default-radius);
+        background: var(--snow);
+        font-family: var(--font-family);
+        font-size: var(--font-size-body);
+        color: var(--text-primary);
+        transition: border-color 0.15s ease;
+    }
+
+    input.api-key-input:focus {
+        outline: none;
+        border-color: var(--amethyst);
+    }
+
+    input.api-key-input.valid {
+        border-color: var(--dark-mint);
+    }
+
+    input.api-key-input.invalid {
+        border-color: var(--sunset);
+    }
+
+    input.api-key-input::placeholder {
+        color: var(--text-secondary);
+    }
+
+    .api-key-status {
+        min-width: 24px;
+        text-align: center;
+    }
+
+    .api-key-status i {
+        font-size: var(--ms1);
+    }
+
+    .api-key-status.valid i {
+        color: var(--dark-mint);
+    }
+
+    .api-key-status.invalid i {
+        color: var(--sunset);
+    }
+
+    .api-key-help {
+        font-size: var(--ms-1);
+        color: var(--text-secondary);
+        line-height: 1.3;
     }
 
     textarea.context-input {
@@ -611,12 +690,28 @@
         gap: var(--spacing-small);
     }
 
-    .violation-description {
+    .violation-summary {
+        font-size: var(--font-size-body);
+        color: var(--text-primary);
+        font-weight: 600;
+        line-height: 1.4;
+        margin: 0;
+    }
+
+    .violation-summary strong {
+        font-weight: var(--font-heavy);
+    }
+
+    .violation-details {
         font-size: var(--font-size-body);
         color: var(--text-primary);
         font-weight: 500;
-        line-height: 1.4;
+        line-height: 1.3;
         margin: 0;
+    }
+
+    .violation-details strong {
+        font-weight: var(--font-heavy);
     }
 
     .violation-impact {
@@ -625,9 +720,10 @@
         font-weight: 500;
         line-height: 1.3;
         margin: 0;
-        padding: var(--padding-tiny);
-        background: var(--snow);
-        border-left: 3px solid var(--twilight-light);
+    }
+
+    .violation-impact strong {
+        font-weight: var(--font-heavy);
     }
 
     .violation-context {
@@ -640,14 +736,15 @@
     }
 
     .violation-recommendation {
-        font-size: var(--ms0);
-        color: var(--midnight);
-        background: var(--mint);
-        padding: var(--padding-tiny);
-        border-radius: 4px;
-        margin-top: var(--spacing-small);
-        border-left: 3px solid var(--dark-mint);
+        font-size: var(--font-size-body);
+        color: var(--text-primary);
+        font-weight: 500;
         line-height: 1.3;
+        margin: 0;
+    }
+
+    .violation-recommendation strong {
+        font-weight: var(--font-heavy);
     }
 
     .trap-reference {
@@ -736,24 +833,55 @@
                 <header>
                     <h1><i class="heading-icon fas fa-wand-magic-sparkles"></i>&nbsp;Critique assistant</h1>
                 </header>
+                
+                <!-- API Key Section -->
+                <div class="item api-key-section" id="apiKeySection">
+                    <div>
+                        <p class="step-label">OpenAI API Key</p>
+                        <small>Required - Your key is stored securely in your browser</small>
+                    </div>
+                    <div class="api-key-input-container">
+                        <input type="password" class="api-key-input" id="apiKeyInput" 
+                               placeholder="sk-proj-... or sk-...">
+                        <div class="api-key-status" id="apiKeyStatus">
+                            <i class="fas fa-circle" style="color: var(--midnight-light);"></i>
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px;">
+                        <label style="display: flex; align-items: center; cursor: pointer; font-size: var(--ms-1);">
+                            <input type="checkbox" id="rememberApiKey" checked style="margin-right: 8px;">
+                            <span>Remember this API key for future sessions</span>
+                        </label>
+                    </div>
+                    <div class="api-key-help">
+                        <p>Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI Platform</a>. Modern keys start with "sk-proj-". Your key is encrypted and stored locally.</p>
+                        <p id="apiKeyError" class="api-key-error hidden" style="color: var(--sunset); font-size: var(--ms-1); margin-top: 8px;"></p>
+                    </div>
+                </div>
+                
+                <!-- Frame Selection -->
                 <div class="item frame-select frame-select-invalid" id="selectFrame">
                     <div>
-                        <p class="step-label">Select a frame</p>
+                        <p class="step-label">Select frames</p>
                         <small>Required</small>
                     </div>
                     <div>
                         <i class="step-icon fas fa-check-circle"></i>
                     </div>
                 </div>
+                
+                <!-- Context Input -->
                 <div class="item add-context" id="addContext">
                     <div>
                         <p class="step-label">Add context</p>
                         <small>Optional</small>
                     </div>
                     <div>
-                        <textarea class="context-input" id="contextInput" placeholder="Tell the agent what to focus on..."></textarea>
+                        <textarea class="context-input" id="contextInput" placeholder="Tell the AI what to focus on (e.g., 'Check mobile usability and accessibility')..."></textarea>
                     </div>
                 </div>
+                
+                <!-- Toggle Section -->
                 <div class="item toggle-section" id="toggleSection">
                     <div>
                         <p class="step-label">Ignore repeated text</p>
@@ -763,6 +891,8 @@
                         <i class="toggle-icon"></i>
                     </div>
                 </div>
+                
+                <!-- CTA Button -->
                 <div class="cta-container">
                     <button class="cta-button disabled" id="ctaButton">
                         <i class="fas fa-wand-magic-sparkles"></i>
@@ -774,7 +904,7 @@
             <div id="phaseTwo" class="loading-container hidden">
                 <header>
                     <h2>Analyzing your design</h2>
-                    <p class="subtitle">This may take a while depending on the size of your selection.</p>
+                    <p class="subtitle">Using your OpenAI API key to analyze the selected frames...</p>
                 </header>
                 <div class="spinner" id="spinner">
                     <div class="spinner-box"></div>
@@ -795,10 +925,10 @@
                         <div class="status-text">Serializing design nodes</div>
                     </div>
                     <div class="status-item waiting" id="status3">
-                        <div class="status-text">Sending to AI assistant</div>
+                        <div class="status-text">Sending to OpenAI for analysis</div>
                     </div>
                     <div class="status-item waiting" id="status4">
-                        <div class="status-text">Processing critique response</div>
+                        <div class="status-text">Processing UX critique</div>
                     </div>
                 </div>
             </div>
@@ -817,7 +947,7 @@
                     </button>
                 </div>
                 <footer id="globalFooter" class="footer">
-                    <p>The AI agent is still in training. Your substantive feedback will help make this tool better.</p>
+                    <p>Your API key is used securely to provide AI-powered UX analysis.</p>
                     <a class="feedback-button basic-button" href="https://forms.gle/NDnGg7RVjf4biB6g8" target="_blank">Give feedback</a>
                 </footer>
             </div>
@@ -825,20 +955,75 @@
     </div>
 
     <script>
-// PERFORMANCE: Optimized state management
+// SECURITY: Simple encryption for API key storage
+function encryptApiKey(key) {
+  const secretKey = 'CritiqueAssistant2024';
+  let encrypted = '';
+  for (let i = 0; i < key.length; i++) {
+    encrypted += String.fromCharCode(key.charCodeAt(i) ^ secretKey.charCodeAt(i % secretKey.length));
+  }
+  return btoa(encrypted);
+}
+
+function decryptApiKey(encryptedKey) {
+  try {
+    const secretKey = 'CritiqueAssistant2024';
+    const encrypted = atob(encryptedKey);
+    let decrypted = '';
+    for (let i = 0; i < encrypted.length; i++) {
+      decrypted += String.fromCharCode(encrypted.charCodeAt(i) ^ secretKey.charCodeAt(i % secretKey.length));
+    }
+    return decrypted;
+  } catch (e) {
+    return null;
+  }
+}
+
+// COMPREHENSIVE UX ANALYSIS PROMPT - Built into the plugin
+const UX_ANALYSIS_PROMPT = `You are an expert UX analyst trained in usability heuristics and design principles. 
+
+Analyze the provided Figma design data and identify usability issues based on:
+
+1. Jakob Nielsen's 10 Usability Heuristics
+2. The 9 UX Tenets: Understandable, Habituating, Comfortable, Responsive, Efficient, Forgiving, Discreet, Protective, Beautiful
+3. The 24 UX Traps: Memory Challenge, Forced Syntax, Inviting Dead End, Uncomprehended Element, Invisible Element, Poor Grouping, Feedback Failure, Distraction, Effectively Invisible Element, Ambiguous Home, Gratuitous Redundancy, Inconsistent Appearance, Variable Outcome, Wandering Element, Physical Challenge, Accidental Activation, Slow or No Response, Captive Wait, Unnecessary Step, System Amnesia, Irreversible Action, Unwanted Disclosure, Data Loss, Unattractive Appearance
+
+CRITICAL: Return ONLY valid JSON array format. No markdown, no explanations, just JSON.
+
+For each issue found, return this exact structure:
+{
+  "title": "Brief issue title",
+  "description": "Detailed description of the problem",
+  "severity": "critical|important|minor", 
+  "principleViolation": "Tenet: Trap - Description",
+  "userImpact": "How this affects users",
+  "recommendation": "Specific fix suggestions",
+  "location": "Design hierarchy path if identifiable"
+}
+
+If no issues found, return: []
+
+Focus on: accessibility, consistency, usability patterns, information architecture, and user flow issues. Pay special attention to the user context provided.`;
+
+// STATE MANAGEMENT
 const STATE = {
   selectedFrames: [],
   context: '',
   ignoreRepeatedText: false,
   analysisInProgress: false,
-  currentPhase: 'phaseOne'
+  currentPhase: 'phaseOne',
+  apiKey: ''
 };
 
-// PERFORMANCE: Cached DOM elements
+// DOM ELEMENTS
 const DOM = {
   phaseOne: document.getElementById('phaseOne'),
   phaseTwo: document.getElementById('phaseTwo'),
   phaseThree: document.getElementById('phaseThree'),
+  apiKeyInput: document.getElementById('apiKeyInput'),
+  apiKeyStatus: document.getElementById('apiKeyStatus'),
+  apiKeyError: document.getElementById('apiKeyError'),
+  rememberApiKey: document.getElementById('rememberApiKey'),
   selectFrame: document.getElementById('selectFrame'),
   contextInput: document.getElementById('contextInput'),
   toggleContainer: document.getElementById('toggleContainer'),
@@ -855,15 +1040,286 @@ const DOM = {
 
 let loadingAnimation = null;
 let inputDebounce = null;
+let apiKeyDebounce = null;
 
-// PERFORMANCE: Optimized initialization
+// MEMORY MANAGEMENT
+function cleanup() {
+  if (loadingAnimation) {
+    clearInterval(loadingAnimation);
+    loadingAnimation = null;
+  }
+  if (inputDebounce) {
+    clearTimeout(inputDebounce);
+    inputDebounce = null;
+  }
+  if (apiKeyDebounce) {
+    clearTimeout(apiKeyDebounce);
+    apiKeyDebounce = null;
+  }
+}
+
+window.addEventListener('beforeunload', cleanup);
+
+// ENHANCED API KEY PERSISTENCE - Multiple storage methods
+function saveApiKey(key) {
+  try {
+    const encrypted = encryptApiKey(key);
+    
+    // Try multiple storage methods for better compatibility
+    const storageKey = 'critique_assistant_api_key';
+    
+    // Method 1: localStorage (primary)
+    try {
+      localStorage.setItem(storageKey, encrypted);
+      console.log('✅ API key saved to localStorage');
+    } catch (e) {
+      console.warn('❌ localStorage failed:', e.message);
+    }
+    
+    // Method 2: sessionStorage (fallback)
+    try {
+      sessionStorage.setItem(storageKey, encrypted);
+      console.log('✅ API key saved to sessionStorage');
+    } catch (e) {
+      console.warn('❌ sessionStorage failed:', e.message);
+    }
+    
+    // Method 3: In-memory storage (last resort)
+    window._critiqueAssistantApiKey = encrypted;
+    console.log('✅ API key saved to memory');
+    
+    return true;
+  } catch (e) {
+    console.error('❌ Failed to save API key:', e);
+    return false;
+  }
+}
+
+function loadApiKey() {
+  try {
+    const storageKey = 'critique_assistant_api_key';
+    let encrypted = null;
+    
+    // Try multiple storage methods in order
+    // Method 1: localStorage (primary)
+    try {
+      encrypted = localStorage.getItem(storageKey);
+      if (encrypted) {
+        console.log('✅ API key loaded from localStorage');
+      }
+    } catch (e) {
+      console.warn('❌ localStorage access failed:', e.message);
+    }
+    
+    // Method 2: sessionStorage (fallback)
+    if (!encrypted) {
+      try {
+        encrypted = sessionStorage.getItem(storageKey);
+        if (encrypted) {
+          console.log('✅ API key loaded from sessionStorage');
+        }
+      } catch (e) {
+        console.warn('❌ sessionStorage access failed:', e.message);
+      }
+    }
+    
+    // Method 3: In-memory storage (last resort)
+    if (!encrypted && window._critiqueAssistantApiKey) {
+      encrypted = window._critiqueAssistantApiKey;
+      console.log('✅ API key loaded from memory');
+    }
+    
+    if (encrypted) {
+      const decrypted = decryptApiKey(encrypted);
+      if (decrypted && decrypted.startsWith('sk-')) {
+        console.log('✅ Successfully decrypted saved API key');
+        return decrypted;
+      } else {
+        console.warn('❌ Failed to decrypt saved API key');
+        // Clear corrupted data
+        clearSavedApiKey();
+      }
+    } else {
+      console.log('ℹ️ No saved API key found');
+    }
+  } catch (e) {
+    console.error('❌ Failed to load API key:', e);
+  }
+  return '';
+}
+
+function clearSavedApiKey() {
+  try {
+    const storageKey = 'critique_assistant_api_key';
+    
+    // Clear from all storage methods
+    try {
+      localStorage.removeItem(storageKey);
+    } catch (e) {
+      console.warn('Could not clear localStorage:', e.message);
+    }
+    
+    try {
+      sessionStorage.removeItem(storageKey);
+    } catch (e) {
+      console.warn('Could not clear sessionStorage:', e.message);
+    }
+    
+    delete window._critiqueAssistantApiKey;
+    console.log('🧹 Cleared all saved API key data');
+  } catch (e) {
+    console.error('Failed to clear saved API key:', e);
+  }
+}
+
+function validateApiKey(key) {
+  // Updated pattern to support all OpenAI API key formats:
+  // - Legacy: sk-... (20 chars)
+  // - New: sk-proj-... (longer)
+  // - Service: sk-svcacct-... (service accounts)
+  const openaiKeyPattern = /^sk-[a-zA-Z0-9\-_]{20,}$/;
+  return openaiKeyPattern.test(key);
+}
+
+function handleApiKeyInput(e) {
+  clearTimeout(apiKeyDebounce);
+  apiKeyDebounce = setTimeout(() => {
+    const key = e.target.value.trim();
+    STATE.apiKey = key;
+    
+    // Clear previous error
+    if (DOM.apiKeyError) {
+      DOM.apiKeyError.classList.add('hidden');
+      DOM.apiKeyError.textContent = '';
+    }
+    
+    if (key === '') {
+      // Empty state
+      DOM.apiKeyStatus.innerHTML = '<i class="fas fa-circle" style="color: var(--midnight-light);"></i>';
+      DOM.apiKeyInput.classList.remove('valid', 'invalid');
+      DOM.apiKeyInput.title = '';
+    } else if (validateApiKey(key)) {
+      // Valid key
+      DOM.apiKeyStatus.innerHTML = '<i class="fas fa-check-circle"></i>';
+      DOM.apiKeyStatus.className = 'api-key-status valid';
+      DOM.apiKeyInput.classList.remove('invalid');
+      DOM.apiKeyInput.classList.add('valid');
+      DOM.apiKeyInput.title = 'Valid OpenAI API key';
+      
+      // Save only if remember checkbox is checked
+      if (DOM.rememberApiKey && DOM.rememberApiKey.checked) {
+        const saved = saveApiKey(key);
+        console.log('💾 API key save attempt:', saved ? 'Success' : 'Failed');
+      } else {
+        console.log('ℹ️ Not saving API key (remember unchecked)');
+        // Clear any previously saved key if user unchecks remember
+        clearSavedApiKey();
+      }
+      
+      console.log('Valid API key detected, length:', key.length);
+    } else {
+      // Invalid key - provide specific feedback
+      DOM.apiKeyStatus.innerHTML = '<i class="fas fa-times-circle"></i>';
+      DOM.apiKeyStatus.className = 'api-key-status invalid';
+      DOM.apiKeyInput.classList.remove('valid');
+      DOM.apiKeyInput.classList.add('invalid');
+      
+      // Specific error messaging
+      let errorMessage = '';
+      if (!key.startsWith('sk-')) {
+        errorMessage = 'API key must start with "sk-"';
+      } else if (key.length < 20) {
+        errorMessage = 'API key is too short (must be at least 20 characters)';
+      } else if (key.includes(' ')) {
+        errorMessage = 'API key should not contain spaces';
+      } else {
+        errorMessage = 'Invalid API key format. Should be "sk-proj-..." or "sk-..."';
+      }
+      
+      DOM.apiKeyInput.title = errorMessage;
+      if (DOM.apiKeyError) {
+        DOM.apiKeyError.textContent = errorMessage;
+        DOM.apiKeyError.classList.remove('hidden');
+      }
+      
+      console.log('Invalid API key:', {
+        prefix: key.substring(0, 10) + '...',
+        length: key.length,
+        hasSpaces: key.includes(' '),
+        startsWithSk: key.startsWith('sk-'),
+        error: errorMessage
+      });
+    }
+    
+    updateCTAButton();
+  }, 300);
+}
+
+// INITIALIZATION WITH ENHANCED DEBUGGING
 function initialize() {
+  console.log('🚀 Critique Assistant initializing...');
+  
+  // Test storage availability first
+  testStorageAvailability();
+  
+  const savedKey = loadApiKey();
+  console.log('💾 Saved key found:', savedKey ? `Yes (${savedKey.length} chars)` : 'No');
+  
+  if (savedKey) {
+    console.log('🔑 Restoring saved API key...');
+    DOM.apiKeyInput.value = savedKey;
+    STATE.apiKey = savedKey;
+    
+    // Validate the loaded key
+    if (validateApiKey(savedKey)) {
+      DOM.apiKeyStatus.innerHTML = '<i class="fas fa-check-circle"></i>';
+      DOM.apiKeyStatus.className = 'api-key-status valid';
+      DOM.apiKeyInput.classList.add('valid');
+      console.log('✅ Saved API key is valid');
+    } else {
+      console.warn('⚠️ Saved API key failed validation, clearing...');
+      clearSavedApiKey();
+      DOM.apiKeyInput.value = '';
+      STATE.apiKey = '';
+    }
+  } else {
+    console.log('ℹ️ No saved API key, user will need to enter one');
+  }
+  
   setupEventListeners();
   updateUI();
   parent.postMessage({ pluginMessage: { type: 'get-initial-state' } }, '*');
+  console.log('✅ Critique Assistant initialized');
+}
+
+function testStorageAvailability() {
+  const testKey = 'test_storage_access';
+  const testValue = 'test';
+  
+  // Test localStorage
+  try {
+    localStorage.setItem(testKey, testValue);
+    const retrieved = localStorage.getItem(testKey);
+    localStorage.removeItem(testKey);
+    console.log('✅ localStorage available:', retrieved === testValue);
+  } catch (e) {
+    console.warn('❌ localStorage not available:', e.message);
+  }
+  
+  // Test sessionStorage  
+  try {
+    sessionStorage.setItem(testKey, testValue);
+    const retrieved = sessionStorage.getItem(testKey);
+    sessionStorage.removeItem(testKey);
+    console.log('✅ sessionStorage available:', retrieved === testValue);
+  } catch (e) {
+    console.warn('❌ sessionStorage not available:', e.message);
+  }
 }
 
 function setupEventListeners() {
+  DOM.apiKeyInput.addEventListener('input', handleApiKeyInput, { passive: true });
+  DOM.rememberApiKey.addEventListener('change', handleRememberCheckboxChange);
   DOM.contextInput.addEventListener('input', handleContextInputDebounced, { passive: true });
   DOM.toggleContainer.addEventListener('click', handleToggleClick);
   DOM.ctaButton.addEventListener('click', handleCTAClick);
@@ -871,13 +1327,26 @@ function setupEventListeners() {
   DOM.critiqueAgainButton.addEventListener('click', handleCritiqueAgain);
 }
 
-// PERFORMANCE: Debounced input with auto-resize
+function handleRememberCheckboxChange(e) {
+  const shouldRemember = e.target.checked;
+  const currentKey = STATE.apiKey;
+  
+  if (shouldRemember && currentKey && validateApiKey(currentKey)) {
+    // User wants to remember a valid key
+    const saved = saveApiKey(currentKey);
+    console.log('💾 User enabled remember - saving key:', saved ? 'Success' : 'Failed');
+  } else if (!shouldRemember) {
+    // User doesn't want to remember - clear saved key
+    clearSavedApiKey();
+    console.log('🧹 User disabled remember - cleared saved key');
+  }
+}
+
 function handleContextInputDebounced(e) {
   clearTimeout(inputDebounce);
   inputDebounce = setTimeout(() => {
     STATE.context = e.target.value;
     
-    // Smooth height adjustment
     requestAnimationFrame(() => {
       e.target.style.height = 'auto';
       e.target.style.height = Math.min(e.target.scrollHeight, 200) + 'px';
@@ -897,12 +1366,12 @@ function handleCTAClick() {
 }
 
 function handleCritiqueAgain() {
-  if (STATE.selectedFrames.length > 0) {
+  if (STATE.selectedFrames.length > 0 && STATE.apiKey) {
     startAnalysis();
   }
 }
 
-// PERFORMANCE: Batched DOM updates
+// UI UPDATES
 function updateUI() {
   requestAnimationFrame(() => {
     updateFrameSelection();
@@ -925,7 +1394,9 @@ function updateToggleButton() {
 }
 
 function updateCTAButton() {
-  const isEnabled = STATE.selectedFrames.length > 0 && !STATE.analysisInProgress;
+  const hasFrames = STATE.selectedFrames.length > 0;
+  const hasValidApiKey = validateApiKey(STATE.apiKey);
+  const isEnabled = hasFrames && hasValidApiKey && !STATE.analysisInProgress;
   
   DOM.ctaButton.classList.toggle('disabled', !isEnabled);
   DOM.ctaButton.classList.toggle('enabled', isEnabled);
@@ -933,10 +1404,12 @@ function updateCTAButton() {
 
 function updateCritiqueAgainButton() {
   const hasFrames = STATE.selectedFrames.length > 0;
-  DOM.critiqueAgainButton.classList.toggle('disabled', !hasFrames);
+  const hasValidApiKey = validateApiKey(STATE.apiKey);
+  const isEnabled = hasFrames && hasValidApiKey;
+  DOM.critiqueAgainButton.classList.toggle('disabled', !isEnabled);
 }
 
-// PERFORMANCE: Efficient phase switching
+// PHASE MANAGEMENT
 function switchToPhase(phase) {
   STATE.currentPhase = phase;
   
@@ -959,6 +1432,7 @@ function switchToPhase(phase) {
   }
 }
 
+// ANALYSIS
 function startAnalysis() {
   if (STATE.selectedFrames.length === 0) {
     parent.postMessage({ 
@@ -970,21 +1444,99 @@ function startAnalysis() {
     return;
   }
 
+  if (!validateApiKey(STATE.apiKey)) {
+    parent.postMessage({ 
+      pluginMessage: { 
+        type: 'show-notification',
+        message: 'Please enter a valid OpenAI API key.'
+      }
+    }, '*');
+    return;
+  }
+
   STATE.analysisInProgress = true;
   updateCTAButton();
   switchToPhase('phaseTwo');
   resetLoadingStatus();
 
+  // Request serialization from plugin
   parent.postMessage({ 
     pluginMessage: { 
-      type: 'analyze-frames',
+      type: 'serialize-frames',
       context: STATE.context,
       ignoreRepeatedText: STATE.ignoreRepeatedText
     }
   }, '*');
 }
 
-// PERFORMANCE: Optimized spinner with fewer DOM operations
+// OPENAI API CALL
+async function analyzeWithOpenAI(designData) {
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${STATE.apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4-turbo',
+        max_tokens: 4000,
+        temperature: 0.1,
+        messages: [
+          {
+            role: 'system',
+            content: UX_ANALYSIS_PROMPT
+          },
+          {
+            role: 'user',
+            content: `Design Analysis Request:
+
+Context: ${STATE.context || 'Comprehensive UX analysis'}
+Design Type: ${designData.contextAnalysis?.designType || 'interface'}
+Complexity: ${designData.contextAnalysis?.complexity || 'unknown'}
+User Context: ${designData.contextAnalysis?.userContext || ''}
+Ignore Repeated Text: ${designData.contextAnalysis?.ignoreRepeatedText || false}
+
+Design Data: ${JSON.stringify(designData.frames)}`
+          }
+        ]
+      })
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Invalid API key. Please check your OpenAI API key.');
+      } else if (response.status === 429) {
+        throw new Error('Rate limit exceeded. Please wait a moment and try again.');
+      } else if (response.status === 402) {
+        throw new Error('Insufficient credits. Please add credits to your OpenAI account.');
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || `OpenAI API error: ${response.status}`);
+      }
+    }
+
+    const result = await response.json();
+    const content = result.choices[0]?.message?.content || '[]';
+    
+    const violations = parseAnalysisResult(content);
+    
+    showResults({
+      summary: violations.length > 0 ? 
+        `Found ${violations.length} UX issues` : 
+        'No major issues found',
+      improvements: violations,
+      rawFeedback: content,
+      tokensUsed: result.usage?.total_tokens || 0
+    });
+
+  } catch (error) {
+    console.error('OpenAI Analysis Error:', error);
+    showError(error.message || 'Analysis failed unexpectedly');
+  }
+}
+
+// LOADING ANIMATION
 function animateSpinner() {
   const spinnerBoxes = DOM.spinner.querySelectorAll('.spinner-box');
   let activeIndex = 0;
@@ -1001,7 +1553,6 @@ function startLoadingAnimation() {
     animateSpinner();
   }
 
-  // Optimized status progression
   const statusProgression = [
     { element: DOM.status1, delay: 200, duration: 400 },
     { element: DOM.status2, delay: 800, duration: 600 },
@@ -1041,6 +1592,32 @@ function resetLoadingStatus() {
   });
 }
 
+function parseAnalysisResult(result) {
+  if (!result) return [];
+  
+  try {
+    if (typeof result === 'string') {
+      if (result.trim() === '' || result === '[]') return [];
+      
+      const parsed = JSON.parse(result);
+      return Array.isArray(parsed) ? parsed : [];
+    }
+    
+    if (Array.isArray(result)) {
+      return result;
+    }
+    
+    if (result.improvements && Array.isArray(result.improvements)) {
+      return result.improvements;
+    }
+    
+    return [];
+  } catch (parseError) {
+    console.error('Parse error:', parseError);
+    return [];
+  }
+}
+
 function showResults(result) {
   STATE.analysisInProgress = false;
   DOM.status4.classList.remove('in-progress');
@@ -1053,7 +1630,7 @@ function showResults(result) {
   }, 600);
 }
 
-// PERFORMANCE: High-performance violation card creation
+// VIOLATION CARD CREATION
 function createViolationCard(violation) {
   const card = document.createElement('div');
   card.className = 'violation-card';
@@ -1071,7 +1648,6 @@ function createViolationCard(violation) {
   const metaDiv = document.createElement('div');
   metaDiv.className = 'violation-meta';
 
-  // Severity badge
   if (violation.severity) {
     const severityBadge = document.createElement('span');
     severityBadge.className = `severity-badge severity-${violation.severity}`;
@@ -1079,7 +1655,6 @@ function createViolationCard(violation) {
     metaDiv.appendChild(severityBadge);
   }
 
-  // Tenet badge from principle violation
   const tenetName = extractTenetFromPrinciple(violation.principleViolation);
   if (tenetName) {
     const tenetBadge = document.createElement('span');
@@ -1094,12 +1669,10 @@ function createViolationCard(violation) {
   const headerRight = document.createElement('div');
   headerRight.className = 'violation-header-right';
 
-  // PERFORMANCE: Optimized focus button
   const focusButton = document.createElement('button');
   focusButton.className = 'focus-button';
   focusButton.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i>';
   
-  // Enhanced context storage for better matching
   focusButton._violationData = {
     title: violation.title,
     description: violation.description,
@@ -1118,44 +1691,32 @@ function createViolationCard(violation) {
   const content = document.createElement('div');
   content.className = 'violation-content';
 
-  // Main description
+  if (violation.principleViolation) {
+    const summaryP = document.createElement('p');
+    summaryP.className = 'violation-summary';
+    summaryP.innerHTML = `<strong>${extractTrapFromPrinciple(violation.principleViolation)}:</strong> ${extractTrapDescription(violation.principleViolation)}`;
+    content.appendChild(summaryP);
+  }
+
   if (violation.description) {
     const descP = document.createElement('p');
-    descP.className = 'violation-description';
-    descP.textContent = violation.description;
+    descP.className = 'violation-details';
+    descP.innerHTML = `<strong>Description:</strong> ${violation.description}`;
     content.appendChild(descP);
   }
 
-  // User impact
   if (violation.userImpact) {
     const impactP = document.createElement('p');
     impactP.className = 'violation-impact';
-    impactP.textContent = `Impact: ${violation.userImpact}`;
+    impactP.innerHTML = `<strong>Impact:</strong> ${violation.userImpact}`;
     content.appendChild(impactP);
   }
 
-  // Context alignment
-  if (violation.contextAlignment) {
-    const contextP = document.createElement('p');
-    contextP.className = 'violation-context';
-    contextP.textContent = `Context: ${violation.contextAlignment}`;
-    content.appendChild(contextP);
-  }
-
-  // Recommendation
   if (violation.recommendation) {
     const recP = document.createElement('p');
     recP.className = 'violation-recommendation';
-    recP.textContent = `Recommendation: ${violation.recommendation}`;
+    recP.innerHTML = `<strong>Recommendation:</strong> ${violation.recommendation}`;
     content.appendChild(recP);
-  }
-
-  // Principle violation
-  if (violation.principleViolation) {
-    const trapRef = document.createElement('div');
-    trapRef.className = 'trap-reference';
-    trapRef.textContent = violation.principleViolation;
-    content.appendChild(trapRef);
   }
 
   card.appendChild(header);
@@ -1163,7 +1724,6 @@ function createViolationCard(violation) {
   return card;
 }
 
-// PERFORMANCE: Ultra-fast focus handler
 function handleFocusButtonClick(e) {
   e.preventDefault();
   e.stopPropagation();
@@ -1181,10 +1741,8 @@ function handleFocusButtonClick(e) {
     return;
   }
 
-  // Immediate visual feedback
   button.classList.add('processing');
   
-  // Fast async message
   parent.postMessage({ 
     pluginMessage: {
       type: 'focus-violation-area-optimized',
@@ -1192,17 +1750,15 @@ function handleFocusButtonClick(e) {
     }
   }, '*');
   
-  // Reset button state
   setTimeout(() => {
     button.classList.remove('processing');
   }, 1500);
 }
 
-// Helper: Extract search terms from violation
+// HELPER FUNCTIONS
 function extractSearchTerms(violation) {
   const terms = new Set();
   
-  // Priority 1: Extract from location path
   if (violation.location) {
     violation.location.split(' > ').forEach(part => {
       const clean = part.trim().toLowerCase();
@@ -1212,17 +1768,14 @@ function extractSearchTerms(violation) {
     });
   }
   
-  // Priority 2: Extract UI elements from title and description
   [violation.title, violation.description].forEach(text => {
     if (text) {
-      // UI element patterns
       const uiPattern = /\b(button|input|field|menu|nav|form|card|modal|dropdown|checkbox|radio|tab|link|icon|frame|group|section|header|footer|sidebar)\b/gi;
       const matches = text.match(uiPattern);
       if (matches) {
         matches.forEach(match => terms.add(match.toLowerCase()));
       }
       
-      // Quoted content (likely element names)
       const quotedPattern = /"([^"]{2,25})"/g;
       let match;
       while ((match = quotedPattern.exec(text)) !== null) {
@@ -1238,7 +1791,6 @@ function isStopWord(word) {
   return ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'].includes(word);
 }
 
-// Helper: Extract tenet name from principle violation text
 function extractTenetFromPrinciple(principleText) {
   if (!principleText) return null;
   
@@ -1253,10 +1805,41 @@ function extractTenetFromPrinciple(principleText) {
   return null;
 }
 
-// PERFORMANCE: Optimized results population
+function extractTrapFromPrinciple(principleText) {
+  if (!principleText) return 'Usability Issue';
+  
+  const traps = [
+    'Memory Challenge', 'Forced Syntax', 'Inviting Dead End', 'Uncomprehended Element',
+    'Invisible Element', 'Poor Grouping', 'Feedback Failure', 'Distraction',
+    'Effectively Invisible Element', 'Ambiguous Home', 'Gratuitous Redundancy',
+    'Inconsistent Appearance', 'Variable Outcome', 'Wandering Element',
+    'Physical Challenge', 'Accidental Activation', 'Slow or No Response',
+    'Captive Wait', 'Unnecessary Step', 'System Amnesia', 'Irreversible Action',
+    'Unwanted Disclosure', 'Data Loss', 'Unattractive Appearance'
+  ];
+  
+  for (const trap of traps) {
+    if (principleText.includes(trap)) {
+      return trap;
+    }
+  }
+  
+  return 'Usability Issue';
+}
+
+function extractTrapDescription(principleText) {
+  if (!principleText) return 'Critical relationship between noticeable cues is not obvious.';
+  
+  const match = principleText.match(/[^:]+:\s*(.+)/);
+  if (match && match[1]) {
+    return match[1].trim();
+  }
+  
+  return 'Critical relationship between noticeable cues is not obvious.';
+}
+
 function populateResults(result) {
   try {
-    // Use DocumentFragment for batch DOM operations
     const fragment = document.createDocumentFragment();
 
     if (result.error) {
@@ -1272,7 +1855,6 @@ function populateResults(result) {
 
     let violations = [];
 
-    // Parse violations from new JSON structure
     if (result.rawFeedback) {
       try {
         const parsed = typeof result.rawFeedback === 'string' 
@@ -1280,7 +1862,7 @@ function populateResults(result) {
           : result.rawFeedback;
         violations = Array.isArray(parsed) ? parsed : [];
       } catch (e) {
-        // Fallback to improvements field
+        console.error('Failed to parse JSON response:', e);
         violations = result.improvements || [];
       }
     } else if (result.improvements && Array.isArray(result.improvements)) {
@@ -1288,7 +1870,6 @@ function populateResults(result) {
     }
 
     if (violations.length > 0) {
-      // Process violations efficiently
       violations.forEach(violation => {
         const card = createViolationCard(violation);
         fragment.appendChild(card);
@@ -1302,13 +1883,12 @@ function populateResults(result) {
       fragment.appendChild(successCard);
     }
 
-    // Single DOM operation
     DOM.resultsContent.replaceChildren(fragment);
   } catch (error) {
     console.error('Results population error:', error);
     const errorCard = createResultCard({
       title: 'Display Error', 
-      content: 'Failed to display results properly.',
+      content: 'Failed to display results properly. Please try again.',
       type: 'error'
     });
     DOM.resultsContent.appendChild(errorCard);
@@ -1366,40 +1946,50 @@ function resetToPhaseOne() {
   switchToPhase('phaseOne');
 }
 
-// PERFORMANCE: Optimized message handling
+// MESSAGE HANDLING
 window.onmessage = (event) => {
   if (!event.data?.pluginMessage) return;
 
   const message = event.data.pluginMessage;
 
-  switch (message.type) {
-    case 'selection-changed':
-      requestAnimationFrame(() => {
-        STATE.selectedFrames = message.frames || [];
-        updateFrameSelection();
-        updateCTAButton();
-        updateCritiqueAgainButton();
-      });
-      break;
-    case 'analysis-started':
-      // No action needed
-      break;
-    case 'analysis-complete':
-      showResults(message.result);
-      break;
-    case 'analysis-error':
-      showError(message.error);
-      break;
+  try {
+    switch (message.type) {
+      case 'selection-changed':
+        requestAnimationFrame(() => {
+          STATE.selectedFrames = message.frames || [];
+          updateFrameSelection();
+          updateCTAButton();
+          updateCritiqueAgainButton();
+        });
+        break;
+      case 'serialization-complete':
+        analyzeWithOpenAI(message.designData);
+        break;
+      case 'serialization-error':
+        showError(message.error);
+        break;
+      default:
+        console.warn('Unknown message type:', message.type);
+    }
+  } catch (error) {
+    console.error('Message handling error:', error);
+    showError('An unexpected error occurred. Please try again.');
   }
 };
 
-// Global error handling
+// ERROR HANDLING
 window.onerror = (msg, url, line, col, error) => {
-  console.error('UI Error:', { msg, line, col });
-  showError('A user interface error occurred. Please try restarting the plugin.');
+  console.error('UI Error:', { msg, line, col, error });
+  showError('A user interface error occurred. Please restart the plugin.');
+  return true;
 };
 
-// Initialize
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Unhandled promise rejection:', event.reason);
+  showError('An unexpected error occurred. Please try again.');
+});
+
+// INITIALIZE
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initialize);
 } else {

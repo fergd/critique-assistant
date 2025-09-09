@@ -1,121 +1,122 @@
-{
-	"trap": "Memory Challenge",
-	"tenet": "Understandable",
-	"description": "The system requires the user to remember information that is easy to forget.",
-},
-{
-	"trap": "Forced Syntax",
-	"tenet": "Understandable",
-	"description": "The system does not allow the user to issue a command or complete a sequence of actions in the order or manner that is most natural to them.",
-},
-{
-	"trap": "Inviting Dead End",
-	"tenet": "Understandable",
-	"description": "A cue (label, icon, affordance, or prompt) is incorrectly judged as a means for achieving a goal. It looks right, but is wrong.",
-},
-{
-	"trap": "Uncomprehended Element",
-	"tenet": "Understandable",
-	"description": "A cue (label, icon, affordance, or prompt) critical to achieving a goal is noticed, but its meaning or the required method of interacting with it is unclear.",
-},
-{
-	"trap": "Invisible Element",
-	"tenet": "Understandable",
-	"description": "No cue (label, icon, affordance, or prompt) is provided to signal to the user how to achieve a goal, and the user has insufficient prior learning to overcome its absense.",
-},
-{
-	"trap": "Poor Grouping",
-	"tenet": "Understandable",
-	"description": "A critical relationship between two or more otherwise noticeable cues (labels, icons, affordances, or prompts) is not obvious. ",
-}, 
-{
-	"trap": "Feedback Failure",
-	"tenet": "Understandable",
-	"description": "The system fails to provide noticeable, comprehensible, and actionable feedback in response to user actions.",
-}
-{
-	"trap": "Distraction",
-	"tenet": "Understandable",
-	"description": "Something in the UI suddenly appears or otherwise draws the user's attention, distracting them from their goal.",
-},
-{
-	"trap": "Effectively Invisible Element",
-	"tenet": "Understandable",
-	"description": "A provided cue (label, icon, affordance, or prompt) is not noticed, or is slow to be noticed because its appearance or location differs from what the user expects.",
-},
-{
-	"trap":"Ambiguous Home",
-	"tenet":"Habituating",	
-	"description":"The UI provides no single place the user can return to at any time to begin a new task or get re-oriented.",
-},
-{
-	"trap": "Gratuitous Redundancy",
-	"tenet": "Habituating",
-	"description": "The system presents duplicate cues (labels, icons, affordances, or prompts) for the same action on the same level, or a directly nested level of the UI.",
-},
-{
-	"trap": "Inconsistant Appearance",
-	"tenet": "Habituating",
-	"description": "The visual appearance of a cue (label, icon, affordance, or prompt) for a given action varies across the UI.",
-},
-
-{
-	"trap": "Variable Outcome",
-	"tenet": "Habituating",
-	"description": "The system responds differently at different times to the same user action.",
-},
-{
-	"trap": "Wandering Element",
-	"tenet": "Habituating",
-	"description": "The physical location of a cue (label, icon, affordance, or prompt) for a given action varies across the UI.",
-},
-{
-	"trap": "Physical Challenge",
-	"tenet": "Comfortable",
-	"description": "An action the system requires the user to perform is physically effortful, difficult, or impossible.",
-},
-{
-	"trap": "Accidental Activation",
-	"tenet": "Comfortable",
-	"description": "The system misinterprets a user's physical actions resulting in an unintended outcome.",
-},
-{
-	"trap": "Slow or No Response",
-	"tenet": "Responsive",
-	"description": "The user is prevented from achieving a goal in a timely manner because of actual or perceived poor system performance.",
-},
-{
-	"trap": "Captive Wait",
-	"tenet": "Responsive",
-	"description": "The user is prevented from achieving a goal in a timely manner because the system intentionally prevents them from advancing and/or backing out of a process.",
-},
-{
-	"trap": "Unnecessary Step",
-	"tenet": "Efficient",
-	"description": "When the product is being used as intended, the number of actual or perceived steps required to achieve a goal is too high.",
-},
-{
-	"trap": "System Amnesia",
-	"tenet": "Efficient",
-	"description": "The system re-prompts the user for information it previously gathered, or otherwise fails to leverage the user's prior work.",
-},
-{
-	"trap": "Irreversible Action",
-	"tenet": "Forgiving",
-	"description": "The system does not allow the user to undo an action they have taken.",
-},
-{
-	"trap": "Unwanted Disclosure",
-	"tenet": "Discreet",
-	"description": "The system makes the user's data or behavior public in a way that is harmful or embarassing to the user.",
-},
-{
-	"trap": "Data Loss",
-	"tenet": "Protective",
-	"description": "The system can lose the user's work through some action or inaction on the user's part.",
-},
-{
-	"trap": "Unattractive Appearance",
-	"tenet": "Beautiful",
-	"description": "The UI is aesthetically unpleasing, inconsistent, and/or inappropriate for its intended audience.",
-}
+[
+  {
+    "trap": "Memory Challenge",
+    "tenet": "Understandable",
+    "description": "The system requires the user to remember information that is easy to forget."
+  },
+  {
+    "trap": "Forced Syntax",
+    "tenet": "Understandable", 
+    "description": "The system does not allow the user to issue a command or complete a sequence of actions in the order or manner that is most natural to them."
+  },
+  {
+    "trap": "Inviting Dead End",
+    "tenet": "Understandable",
+    "description": "A cue (label, icon, affordance, or prompt) is incorrectly judged as a means for achieving a goal. It looks right, but is wrong."
+  },
+  {
+    "trap": "Uncomprehended Element", 
+    "tenet": "Understandable",
+    "description": "A cue (label, icon, affordance, or prompt) critical to achieving a goal is noticed, but its meaning or the required method of interacting with it is unclear."
+  },
+  {
+    "trap": "Invisible Element",
+    "tenet": "Understandable",
+    "description": "No cue (label, icon, affordance, or prompt) is provided to signal to the user how to achieve a goal, and the user has insufficient prior learning to overcome its absence."
+  },
+  {
+    "trap": "Poor Grouping",
+    "tenet": "Understandable", 
+    "description": "A critical relationship between two or more otherwise noticeable cues (labels, icons, affordances, or prompts) is not obvious."
+  },
+  {
+    "trap": "Feedback Failure",
+    "tenet": "Understandable",
+    "description": "The system fails to provide noticeable, comprehensible, and actionable feedback in response to user actions."
+  },
+  {
+    "trap": "Distraction",
+    "tenet": "Understandable",
+    "description": "Something in the UI suddenly appears or otherwise draws the user's attention, distracting them from their goal."
+  },
+  {
+    "trap": "Effectively Invisible Element",
+    "tenet": "Understandable",
+    "description": "A provided cue (label, icon, affordance, or prompt) is not noticed, or is slow to be noticed because its appearance or location differs from what the user expects."
+  },
+  {
+    "trap": "Ambiguous Home",
+    "tenet": "Habituating",
+    "description": "The UI provides no single place the user can return to at any time to begin a new task or get re-oriented."
+  },
+  {
+    "trap": "Gratuitous Redundancy", 
+    "tenet": "Habituating",
+    "description": "The system presents duplicate cues (labels, icons, affordances, or prompts) for the same action on the same level, or a directly nested level of the UI."
+  },
+  {
+    "trap": "Inconsistent Appearance",
+    "tenet": "Habituating", 
+    "description": "The visual appearance of a cue (label, icon, affordance, or prompt) for a given action varies across the UI."
+  },
+  {
+    "trap": "Variable Outcome",
+    "tenet": "Habituating",
+    "description": "The system responds differently at different times to the same user action."
+  },
+  {
+    "trap": "Wandering Element",
+    "tenet": "Habituating",
+    "description": "The physical location of a cue (label, icon, affordance, or prompt) for a given action varies across the UI."
+  },
+  {
+    "trap": "Physical Challenge",
+    "tenet": "Comfortable", 
+    "description": "An action the system requires the user to perform is physically effortful, difficult, or impossible."
+  },
+  {
+    "trap": "Accidental Activation",
+    "tenet": "Comfortable",
+    "description": "The system misinterprets a user's physical actions resulting in an unintended outcome."
+  },
+  {
+    "trap": "Slow or No Response",
+    "tenet": "Responsive",
+    "description": "The user is prevented from achieving a goal in a timely manner because of actual or perceived poor system performance."
+  },
+  {
+    "trap": "Captive Wait",
+    "tenet": "Responsive", 
+    "description": "The user is prevented from achieving a goal in a timely manner because the system intentionally prevents them from advancing and/or backing out of a process."
+  },
+  {
+    "trap": "Unnecessary Step",
+    "tenet": "Efficient",
+    "description": "When the product is being used as intended, the number of actual or perceived steps required to achieve a goal is too high."
+  },
+  {
+    "trap": "System Amnesia",
+    "tenet": "Efficient",
+    "description": "The system re-prompts the user for information it previously gathered, or otherwise fails to leverage the user's prior work."
+  },
+  {
+    "trap": "Irreversible Action",
+    "tenet": "Forgiving",
+    "description": "The system does not allow the user to undo an action they have taken."
+  },
+  {
+    "trap": "Unwanted Disclosure", 
+    "tenet": "Discreet",
+    "description": "The system makes the user's data or behavior public in a way that is harmful or embarrassing to the user."
+  },
+  {
+    "trap": "Data Loss",
+    "tenet": "Protective",
+    "description": "The system can lose the user's work through some action or inaction on the user's part."
+  },
+  {
+    "trap": "Unattractive Appearance",
+    "tenet": "Beautiful", 
+    "description": "The UI is aesthetically unpleasing, inconsistent, and/or inappropriate for its intended audience."
+  }
+]

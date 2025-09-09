@@ -2,12 +2,8 @@ figma.showUI(__html__, { width: 580, height: 800 });
 
 console.log('MAIN CODE - Plugin started, UI shown');
 
-// CORE ISSUES IDENTIFIED AND FIXED:
-// 1. CORS header conflicts with proxy server
-// 2. Excessive payload size causing timeouts  
-// 3. No retry mechanism for network failures
-// 4. Insufficient error recovery
-// 5. Over-complex serialization for AI needs
+// USER API KEY VERSION - Calls OpenAI directly from plugin
+// No Railway server needed - users bring their own API keys
 
 // PRODUCTION: Simplified serialization focused on AI analysis needs
 function serializeNodeForAI(node, depth) {
@@ -52,7 +48,7 @@ function serializeNodeForAI(node, depth) {
 }
 
 // PRODUCTION: Lightweight context analysis for faster processing
-function analyzeDesignContext(frames, userContext) {
+function analyzeDesignContext(frames, userContext, ignoreRepeatedText) {
   var textContent = '';
   var interactiveCount = 0;
   var totalNodes = 0;
@@ -62,7 +58,15 @@ function analyzeDesignContext(frames, userContext) {
     totalNodes++;
     
     if (node.type === 'TEXT' && node.characters && textContent.length < 2000) {
-      textContent += node.characters + ' ';
+      // If ignoreRepeatedText is true, only add unique text
+      if (ignoreRepeatedText) {
+        var newText = node.characters + ' ';
+        if (textContent.indexOf(newText.trim()) === -1) {
+          textContent += newText;
+        }
+      } else {
+        textContent += node.characters + ' ';
+      }
     }
     
     var nodeName = (node.name || '').toLowerCase();
@@ -86,6 +90,7 @@ function analyzeDesignContext(frames, userContext) {
     complexity: totalNodes > 100 ? 'high' : totalNodes > 50 ? 'medium' : 'low',
     hasInteractiveElements: interactiveCount > 0,
     userContext: userContext || '',
+    ignoreRepeatedText: ignoreRepeatedText || false,
     textSample: textContent.slice(0, 500)
   };
 }
@@ -97,83 +102,6 @@ function detectDesignType(textContent) {
   if (/\b(dashboard|analytics|metrics|overview)\b/.test(lower)) return 'dashboard';
   if (/\b(submit|required|input|form)\b/.test(lower)) return 'form';
   return 'interface';
-}
-
-// PRODUCTION: Robust API request with automatic retries
-function makeAnalysisRequest(payload, context, attempt) {
-  if (attempt === undefined) attempt = 1;
-  var maxAttempts = 2; // Only 1 retry to avoid excessive delays
-  
-  return new Promise(function(resolve, reject) {
-    // CRITICAL: Remove problematic headers that cause CORS issues
-    var requestOptions = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-        // Removed Cache-Control to fix CORS error
-      },
-      body: JSON.stringify({
-        frames: payload,
-        context: context,
-        timestamp: Date.now()
-      })
-    };
-    
-    // Set timeout based on complexity
-    var timeoutDuration = payload.length > 5 ? 35000 : 25000;
-    var timeoutId = setTimeout(function() {
-      reject(new Error('Analysis timeout - design may be too complex'));
-    }, timeoutDuration);
-    
-    fetch('https://critique-assistant-production.up.railway.app/api/proxy', requestOptions)
-      .then(function(response) {
-        clearTimeout(timeoutId);
-        
-        if (response.status === 408) {
-          throw new Error('SERVER_TIMEOUT');
-        } else if (response.status === 413) {
-          throw new Error('PAYLOAD_TOO_LARGE');
-        } else if (response.status === 429) {
-          throw new Error('RATE_LIMITED');
-        } else if (response.status >= 500) {
-          throw new Error('SERVER_ERROR');
-        } else if (!response.ok) {
-          throw new Error('HTTP_' + response.status);
-        }
-        
-        return response.json();
-      })
-      .then(function(data) {
-        if (data && data.content) {
-          resolve(data.content);
-        } else if (data && data.error) {
-          throw new Error(data.error);
-        } else {
-          resolve('[]');
-        }
-      })
-      .catch(function(error) {
-        clearTimeout(timeoutId);
-        
-        // Retry logic for recoverable errors
-        var retryableErrors = ['SERVER_TIMEOUT', 'SERVER_ERROR', 'fetch'];
-        var shouldRetry = attempt < maxAttempts && 
-          retryableErrors.some(function(errorType) {
-            return error.message.indexOf(errorType) !== -1;
-          });
-        
-        if (shouldRetry) {
-          console.log('Retrying analysis request, attempt ' + (attempt + 1));
-          setTimeout(function() {
-            makeAnalysisRequest(payload, context, attempt + 1)
-              .then(resolve)
-              .catch(reject);
-          }, 2000); // 2 second delay between retries
-        } else {
-          reject(error);
-        }
-      });
-  });
 }
 
 // PRODUCTION: Frame selection and state management
@@ -209,56 +137,7 @@ function updateFrameSelection() {
   });
 }
 
-// PRODUCTION: Fast violation focusing without complex scoring
-function handleViolationFocus(violationContext) {
-  if (!violationContext || selectedFrames.length === 0) {
-    figma.notify("Cannot focus on violation");
-    return Promise.resolve();
-  }
-
-  return new Promise(function(resolve) {
-    try {
-      console.log('Looking for location:', violationContext.location);
-      
-      var targetNode = findNodeByLocationPath(violationContext.location);
-      
-      if (targetNode) {
-        figma.getNodeByIdAsync(targetNode.id)
-          .then(function(node) {
-            if (node) {
-              figma.currentPage.selection = [node];
-              figma.viewport.scrollAndZoomIntoView([node]);
-              figma.notify('Found: ' + node.name);
-              highlightNodeSimple(node);
-            } else {
-              fallbackToFrames();
-            }
-            resolve();
-          })
-          .catch(function(error) {
-            console.log('Error selecting node:', error);
-            fallbackToFrames();
-            resolve();
-          });
-      } else {
-        console.log('Could not find node for location path');
-        fallbackToFrames();
-        resolve();
-      }
-    } catch (error) {
-      console.log('Focus error:', error);
-      fallbackToFrames();
-      resolve();
-    }
-  });
-  
-  function fallbackToFrames() {
-    figma.currentPage.selection = selectedFrames;
-    figma.viewport.scrollAndZoomIntoView(selectedFrames);
-    figma.notify('Showing selected frames - could not locate specific element');
-  }
-}
-
+// PRODUCTION: Fast violation focusing with improved node matching
 function handleViolationFocus(violationContext) {
   if (!violationContext || selectedFrames.length === 0) {
     figma.notify("Cannot focus on violation");
@@ -428,92 +307,6 @@ function calculateMatchScore(node, keywords) {
   return score;
 }
 
-function extractSimpleSearchTerms(violation) {
-  var terms = [];
-  var sources = [violation.title, violation.description, violation.location];
-  
-  // Priority 1: Extract from location path - this is most reliable
-  if (violation.location && typeof violation.location === 'string') {
-    // Split by common separators and extract meaningful parts
-    var locationParts = violation.location.split(/[>\-\+\(\)]/);
-    for (var i = 0; i < locationParts.length; i++) {
-      var part = locationParts[i].trim().toLowerCase();
-      if (part.length > 2 && !isStopWord(part)) {
-        terms.push(part);
-        // Also add parts of compound names
-        if (part.includes(' ')) {
-          var subParts = part.split(' ');
-          for (var j = 0; j < subParts.length; j++) {
-            var subPart = subParts[j].trim();
-            if (subPart.length > 2 && !isStopWord(subPart)) {
-              terms.push(subPart);
-            }
-          }
-        }
-      }
-    }
-  }
-  
-  for (var i = 0; i < sources.length; i++) {
-    var source = sources[i];
-    if (source && typeof source === 'string') {
-      // Extract quoted terms (likely element names or content)
-      var quoted = source.match(/"([^"]{2,20})"/g);
-      if (quoted) {
-        for (var j = 0; j < quoted.length; j++) {
-          var quotedTerm = quoted[j].replace(/"/g, '').toLowerCase();
-          if (!isStopWord(quotedTerm)) {
-            terms.push(quotedTerm);
-          }
-        }
-      }
-      
-      // Extract UI element types
-      var uiTerms = source.match(/\b(button|input|field|menu|nav|form|link|icon|card|number|text|label|header|title)\b/gi);
-      if (uiTerms) {
-        for (var k = 0; k < uiTerms.length; k++) {
-          terms.push(uiTerms[k].toLowerCase());
-        }
-      }
-    }
-  }
-  
-  // Remove duplicates and return first 5 terms
-  var uniqueTerms = [];
-  for (var l = 0; l < terms.length && uniqueTerms.length < 5; l++) {
-    if (uniqueTerms.indexOf(terms[l]) === -1) {
-      uniqueTerms.push(terms[l]);
-    }
-  }
-  
-  return uniqueTerms;
-}
-
-function findInFrame(frame, searchTerms, depth) {
-  if (depth > 4 || !frame || frame.visible === false) return null;
-  
-  var frameName = (frame.name || '').toLowerCase();
-  var frameText = (frame.characters || '').toLowerCase();
-  
-  // Check if this node matches
-  for (var i = 0; i < searchTerms.length; i++) {
-    var term = searchTerms[i];
-    if (frameName.indexOf(term) !== -1 || frameText.indexOf(term) !== -1) {
-      return { id: frame.id, name: frame.name };
-    }
-  }
-  
-  // Check children
-  if (frame.children && frame.children.length > 0) {
-    for (var j = 0; j < Math.min(frame.children.length, 8); j++) {
-      var match = findInFrame(frame.children[j], searchTerms, depth + 1);
-      if (match) return match;
-    }
-  }
-  
-  return null;
-}
-
 function highlightNodeSimple(node) {
   try {
     if (node.hasOwnProperty("strokes")) {
@@ -576,8 +369,8 @@ figma.ui.onmessage = function(msg) {
         }
         break;
       
-      case 'analyze-frames':
-        handleAnalysisRequest(msg);
+      case 'serialize-frames':
+        handleFrameSerialization(msg);
         break;
 
       case 'focus-violation-area-optimized':
@@ -595,26 +388,25 @@ figma.ui.onmessage = function(msg) {
   } catch (error) {
     console.error('Plugin Error:', error);
     figma.ui.postMessage({
-      type: 'analysis-error',
+      type: 'serialization-error',
       error: 'Plugin error occurred. Please try again.'
     });
   }
 };
 
-function handleAnalysisRequest(msg) {
+function handleFrameSerialization(msg) {
   if (selectedFrames.length === 0) {
     figma.ui.postMessage({ 
-      type: 'analysis-error', 
+      type: 'serialization-error', 
       error: 'Please select one or more frames to analyze.' 
     });
     return;
   }
 
-  // CRITICAL: Limit frames to prevent timeouts
-  var framesToAnalyze = selectedFrames.slice(0, 5); // Max 5 frames
-  figma.ui.postMessage({ type: 'analysis-started' });
-
   try {
+    // Allow more frames for complex design analysis
+    var framesToAnalyze = selectedFrames.slice(0, 8); // Up to 8 frames
+    
     // OPTIMIZED: Lightweight serialization
     var payload = [];
     for (var i = 0; i < framesToAnalyze.length; i++) {
@@ -624,80 +416,26 @@ function handleAnalysisRequest(msg) {
       }
     }
     
-    var context = analyzeDesignContext(payload, msg.context);
+    console.log('Serialized design data:', payload.length + ' frames');
     
-    makeAnalysisRequest(payload, context)
-      .then(function(result) {
-        var violations = parseAnalysisResult(result);
-        
-        figma.ui.postMessage({
-          type: 'analysis-complete',
-          result: {
-            summary: violations.length > 0 ? 
-              'Found ' + violations.length + ' UX issues' : 
-              'No major issues found',
-            improvements: violations,
-            rawFeedback: result
-          }
-        });
-      })
-      .catch(function(error) {
-        var errorMessage = getUserFriendlyErrorMessage(error);
-        figma.ui.postMessage({
-          type: 'analysis-error',
-          error: errorMessage
-        });
-      });
+    // Create context analysis
+    var contextAnalysis = analyzeDesignContext(payload, msg.context, msg.ignoreRepeatedText);
+    
+    // Send serialized data back to UI for OpenAI analysis
+    figma.ui.postMessage({
+      type: 'serialization-complete',
+      designData: {
+        frames: payload,
+        contextAnalysis: contextAnalysis
+      }
+    });
       
   } catch (error) {
+    console.error('Serialization error:', error);
     figma.ui.postMessage({
-      type: 'analysis-error',
-      error: 'Failed to prepare design for analysis. Please try selecting simpler frames.'
+      type: 'serialization-error',
+      error: 'Failed to prepare design for analysis. Please try selecting different frames.'
     });
-  }
-}
-
-function parseAnalysisResult(result) {
-  if (!result) return [];
-  
-  try {
-    if (typeof result === 'string') {
-      if (result.trim() === '' || result === '[]') return [];
-      
-      var parsed = JSON.parse(result);
-      return Array.isArray(parsed) ? parsed : [];
-    }
-    
-    if (Array.isArray(result)) {
-      return result;
-    }
-    
-    if (result.improvements && Array.isArray(result.improvements)) {
-      return result.improvements;
-    }
-    
-    return [];
-  } catch (parseError) {
-    console.error('Parse error:', parseError);
-    return [];
-  }
-}
-
-function getUserFriendlyErrorMessage(error) {
-  var message = error.message || 'Unknown error';
-  
-  if (message.indexOf('timeout') !== -1) {
-    return 'Analysis timed out. Try selecting fewer or simpler frames.';
-  } else if (message.indexOf('PAYLOAD_TOO_LARGE') !== -1) {
-    return 'Design too complex. Please select fewer frames.';
-  } else if (message.indexOf('RATE_LIMITED') !== -1) {
-    return 'Too many requests. Please wait 30 seconds and try again.';
-  } else if (message.indexOf('SERVER') !== -1) {
-    return 'Analysis service temporarily unavailable. Please try again in a few minutes.';
-  } else if (message.indexOf('fetch') !== -1 || message.indexOf('Network') !== -1) {
-    return 'Network error. Please check your connection and try again.';
-  } else {
-    return 'Analysis failed. Please try again with a simpler selection.';
   }
 }
 
@@ -705,4 +443,4 @@ function getUserFriendlyErrorMessage(error) {
 currentSelection = figma.selection || figma.currentPage.selection || [];
 updateFrameSelection();
 
-console.log('FIGMA CODE - Production-ready plugin loaded');
+console.log('FIGMA CODE - User API key version loaded');
